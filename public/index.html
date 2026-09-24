@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+
+  <meta name="theme-color" content="#0b0d12">
+  <meta
+    name="description"
+    content="ذكا صناعي — دردشة وصور وفيديو وصوت في مكان واحد"
+  >
+
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="stylesheet" href="/style.css">
+
+  <title>ذكا صناعي</title>
+</head>
+
+<body>
+
+<div class="app-shell">
+
+  <!-- الشريط العلوي -->
+  <header class="topbar">
+
+    <div class="brand">
+
+      <span class="brand-mark">ذ</span>
+
+      <div>
+        <b>ذكا صناعي</b>
+        <small>كل أدوات الذكاء في مكان واحد</small>
+      </div>
+
+    </div>
+
+    <div class="status" id="status">
+      جاري الاتصال…
+    </div>
+
+  </header>
+
+
+  <!-- أوضاع التطبيق -->
+  <section class="modes" aria-label="الأوضاع">
+
+    <button
+      class="mode-btn active"
+      data-mode="chat">
+      💬 محادثة
+    </button>
+
+    <button
+      class="mode-btn"
+      data-mode="image">
+      🖼️ صورة
+    </button>
+
+    <button
+      class="mode-btn"
+      data-mode="video">
+      🎬 فيديو
+    </button>
+
+  </section>
+
+
+  <!-- أدوات التحكم -->
+  <section class="toolbar">
+
+    <label>
+      المزود
+
+      <select id="providerSelect"></select>
+
+    </label>
+
+
+    <label>
+      النموذج
+
+      <select id="modelSelect"></select>
+
+    </label>
+
+
+    <!-- نسبة الصورة -->
+
+    <label id="ratioWrap">
+
+      الأبعاد
+
+      <select id="ratioSelect">
+
+        <option value="1:1">1:1</option>
+
+        <option value="4:3">4:3</option>
+
+        <option value="3:4">3:4</option>
+
+        <option value="16:9">16:9</option>
+
+        <option value="9:16">9:16</option>
+
+        <option value="3:2">3:2</option>
+
+      </select>
+
+    </label>
+
+
+    <!-- جودة الصورة -->
+
+    <label id="sizeWrap">
+
+      الجودة
+
+      <select id="sizeSelect">
+
+        <option value="1K">1K</option>
+
+        <option value="2K">2K</option>
+
+        <option value="4K">4K</option>
+
+      </select>
+
+    </label>
+
+
+    <!-- الصوت -->
+
+    <button
+      id="voiceToggle"
+      class="ghost"
+      type="button">
+
+      🎙️ صوت
+
+    </button>
+
+
+    <!-- مسح المحادثة -->
+
+    <button
+      id="clearBtn"
+      class="ghost"
+      type="button">
+
+      مسح
+
+    </button>
+
+  </section>
+
+
+  <!-- المحادثة -->
+
+  <main
+    id="chat"
+    class="chat">
+  </main>
+
+
+  <!-- نتيجة الصور والفيديو -->
+
+  <section
+    id="mediaResult"
+    class="media-result hidden">
+  </section>
+
+
+  <!-- مربع الكتابة -->
+
+  <form
+    id="composer"
+    class="composer">
+
+    <textarea
+      id="prompt"
+      rows="1"
+      placeholder="اكتب طلبك…">
+    </textarea>
+
+
+    <div class="composer-actions">
+
+      <!-- ميكروفون -->
+
+      <button
+        type="button"
+        id="micBtn"
+        class="icon-btn"
+        title="الميكروفون">
+
+        🎤
+
+      </button>
+
+
+      <!-- إرسال -->
+
+      <button
+        type="submit"
+        class="send-btn">
+
+        إرسال
+
+      </button>
+
+    </div>
+
+  </form>
+
+
+  <!-- لوحة الصوت -->
+
+  <div
+    class="voice-panel hidden"
+    id="voicePanel">
+
+    <div>
+
+      <b>الوضع الصوتي</b>
+
+      <span id="voiceState">
+        اضغط الميكروفون وتحدث
+      </span>
+
+    </div>
+
+
+    <button
+      id="voiceMic"
+      class="voice-mic"
+      type="button">
+
+      🎙️
+
+    </button>
+
+  </div>
+
+</div>
+
+
+<!-- JavaScript الرئيسي -->
+
+<script src="/app.js"></script>
+
+
+<!-- تشغيل PWA -->
+
+<script>
+
+  if ("serviceWorker" in navigator) {
+
+    window.addEventListener("load", () => {
+
+      navigator.serviceWorker
+        .register("/sw.js")
+        .catch(() => {});
+
+    });
+
+  }
+
+</script>
+
+</body>
+</html>
