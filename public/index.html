@@ -200,20 +200,28 @@
 
   <!-- لوحة الصوت -->
 
-  <div
-    class="voice-panel hidden"
-    id="voicePanel">
+<section id="livePanel" class="live-panel hidden">
 
+  <div class="live-header">
     <div>
-
-      <b>الوضع الصوتي</b>
-
-      <span id="voiceState">
-        اضغط الميكروفون وتحدث
-      </span>
-
+      <strong>🎙️ مكالمة لايف</strong>
+      <small id="liveStatus">جاهز للاتصال</small>
     </div>
 
+    <span id="liveDot" class="live-dot"></span>
+  </div>
+
+  <div id="liveMessages" class="live-messages"></div>
+
+  <button id="liveCallBtn" class="live-call-btn" type="button">
+    🎙️ بدء المكالمة
+  </button>
+
+  <button id="liveStopBtn" class="live-stop-btn hidden" type="button">
+    ☎️ إنهاء المكالمة
+  </button>
+
+</section>
 
     <button
       id="voiceMic"
