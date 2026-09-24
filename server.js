@@ -371,10 +371,21 @@ app.post('/api/chat', async (req, res) => {
 app.post('/api/gemini-image', async (req, res) => {
   try {
     const key = requireKey('GEMINI_API_KEY');
-    const available = envList('GEMINI_IMAGE_MODELS', 'GEMINI_IMAGE_MODEL', DEFAULT_GEMINI_IMAGE_MODELS);
-    const model = safe(req.body?.model) || available[0];
+
+    const available = envList(
+      'GEMINI_IMAGE_MODELS',
+      'GEMINI_IMAGE_MODEL',
+      DEFAULT_GEMINI_IMAGE_MODELS
+    );
+
+    const model = safe(req.body?.model) || available[0] || 'gemini-3.1-flash-image';
     const prompt = safe(req.body?.prompt);
-    if (!prompt) return res.status(400).json({ error: 'اكتب وصف الصورة أولًا.' });
+
+    if (!prompt) {
+      return res.status(400).json({
+        error: 'اكتب وصف الصورة أولًا.'
+      });
+    }
 
     const responseFormat = {
       type: 'image',
@@ -383,20 +394,87 @@ app.post('/api/gemini-image', async (req, res) => {
       image_size: safe(req.body?.imageSize) || '1K'
     };
 
-    const r = await fetch('https://generativelanguage.googleapis.com/v1beta/interactions', {
-      method: 'POST',
-      headers: { 'x-goog-api-key': key, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model, input: prompt, response_format: responseFormat })
-    });
-    const data = await r.json();
-    if (!r.ok) return res.status(r.status).json({ error: data?.error?.message || 'فشل توليد صورة Gemini.' });
+    const r = await fetch(
+      'https://generativelanguage.googleapis.com/v1beta/interactions',
+      {
+        method: 'POST',
+        headers: {
+          'x-goog-api-key': key,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model,
+          input: prompt,
+          response_format: responseFormat
+        })
+      }
+    );
 
-    const image = data?.output_image;
-    if (!image?.data) return res.status(502).json({ error: 'Gemini لم يُرجع صورة. جرّب نموذج صورة آخر.' });
-    const mime = safe(image.mime_type) || 'image/png';
-    return res.json({ ok: true, provider: 'gemini', model, imageUrl: `data:${mime};base64,${image.data}` });
+    const data = await r.json();
+
+    if (!r.ok) {
+      return res.status(r.status).json({
+        error:
+          data?.error?.message ||
+          data?.message ||
+          `فشل توليد صورة Gemini (${r.status}).`
+      });
+    }
+
+    // الطريقة الأولى: output_image
+    let image = data?.output_image;
+
+    // الطريقة الثانية: steps -> model_output -> image
+    if (!image?.data && Array.isArray(data?.steps)) {
+      for (const step of data.steps) {
+        if (step?.type !== 'model_output') continue;
+
+        const content = Array.isArray(step?.content)
+          ? step.content
+          : [];
+
+        const found = content.find(
+          (item) =>
+            item?.type === 'image' &&
+            item?.data
+        );
+
+        if (found) {
+          image = {
+            data: found.data,
+            mime_type: found.mime_type
+          };
+          break;
+        }
+      }
+    }
+
+    if (!image?.data) {
+      return res.status(502).json({
+        error: 'Gemini استجاب لكن لم تُرجع الاستجابة بيانات صورة.'
+      });
+    }
+
+    const mime =
+      safe(image.mime_type) ||
+      safe(image.mimeType) ||
+      'image/png';
+
+    return res.json({
+      ok: true,
+      provider: 'gemini',
+      model,
+      imageUrl: `data:${mime};base64,${image.data}`
+    });
+
   } catch (error) {
-    res.status(500).json({ error: error.message || 'حدث خطأ في توليد الصورة.' });
+    console.error('Gemini image error:', error);
+
+    return res.status(500).json({
+      error:
+        error.message ||
+        'حدث خطأ في توليد الصورة.'
+    });
   }
 });
 
