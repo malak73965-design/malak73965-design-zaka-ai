@@ -227,3 +227,461 @@ composer.onsubmit = async (e) => {
 setupSpeech();
 load().catch((e) => { statusEl.textContent = 'تعذر الاتصال بالسيرفر'; err(e.message); });
 addMessage('ai', 'مرحبًا 👋\nاختر ChatGPT أو Gemini للمحادثة، أو Gemini Image / Pixazo للصور، أو Pixazo للفيديو.');
+
+// ==========================================
+// 🎙️ GEMINI LIVE VOICE
+// ==========================================
+
+let liveSocket = null;
+let liveStream = null;
+let liveAudioContext = null;
+let liveSource = null;
+let liveProcessor = null;
+
+let livePlaybackContext = null;
+let liveNextPlayTime = 0;
+
+const livePanel = document.getElementById('livePanel');
+const liveCallBtn = document.getElementById('liveCallBtn');
+const liveStopBtn = document.getElementById('liveStopBtn');
+const liveStatus = document.getElementById('liveStatus');
+const liveDot = document.getElementById('liveDot');
+const liveMessages = document.getElementById('liveMessages');
+
+function liveSetStatus(text, active = false) {
+  if (liveStatus) liveStatus.textContent = text;
+  if (liveDot) liveDot.classList.toggle('active', active);
+}
+
+function liveAddMessage(type, text) {
+  if (!liveMessages || !text) return;
+
+  const div = document.createElement('div');
+  div.className = `live-message ${type}`;
+  div.textContent = text;
+
+  liveMessages.appendChild(div);
+  liveMessages.scrollTop = liveMessages.scrollHeight;
+}
+
+function base64ToBytes(base64) {
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+
+  return bytes;
+}
+
+function pcm16ToFloat32(bytes) {
+  const view = new DataView(
+    bytes.buffer,
+    bytes.byteOffset,
+    bytes.byteLength
+  );
+
+  const output = new Float32Array(bytes.byteLength / 2);
+
+  for (let i = 0; i < output.length; i++) {
+    output[i] = view.getInt16(i * 2, true) / 32768;
+  }
+
+  return output;
+}
+
+function playGeminiPCM(base64) {
+  const bytes = base64ToBytes(base64);
+  const samples = pcm16ToFloat32(bytes);
+
+  if (!livePlaybackContext) {
+    livePlaybackContext = new AudioContext({
+      sampleRate: 24000
+    });
+
+    liveNextPlayTime =
+      livePlaybackContext.currentTime;
+  }
+
+  const buffer =
+    livePlaybackContext.createBuffer(
+      1,
+      samples.length,
+      24000
+    );
+
+  buffer.copyToChannel(samples, 0);
+
+  const source =
+    livePlaybackContext.createBufferSource();
+
+  source.buffer = buffer;
+  source.connect(
+    livePlaybackContext.destination
+  );
+
+  const now =
+    livePlaybackContext.currentTime;
+
+  if (liveNextPlayTime < now) {
+    liveNextPlayTime = now;
+  }
+
+  source.start(liveNextPlayTime);
+
+  liveNextPlayTime += buffer.duration;
+}
+
+function sendLiveAudio(float32) {
+  if (
+    !liveSocket ||
+    liveSocket.readyState !== WebSocket.OPEN
+  ) {
+    return;
+  }
+
+  const pcm = new Int16Array(
+    float32.length
+  );
+
+  for (let i = 0; i < float32.length; i++) {
+    const value =
+      Math.max(-1, Math.min(1, float32[i]));
+
+    pcm[i] =
+      value < 0
+        ? value * 32768
+        : value * 32767;
+  }
+
+  const bytes =
+    new Uint8Array(pcm.buffer);
+
+  let binary = '';
+
+  for (
+    let i = 0;
+    i < bytes.length;
+    i += 0x8000
+  ) {
+    binary += String.fromCharCode(
+      ...bytes.subarray(
+        i,
+        i + 0x8000
+      )
+    );
+  }
+
+  liveSocket.send(
+    JSON.stringify({
+      realtimeInput: {
+        mediaChunks: [
+          {
+            mimeType: 'audio/pcm;rate=16000',
+            data: btoa(binary)
+          }
+        ]
+      }
+    })
+  );
+}
+
+async function startLiveMicrophone() {
+
+  liveStream =
+    await navigator.mediaDevices.getUserMedia({
+      audio: {
+        channelCount: 1,
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true
+      }
+    });
+
+  liveAudioContext =
+    new AudioContext({
+      sampleRate: 16000
+    });
+
+  liveSource =
+    liveAudioContext.createMediaStreamSource(
+      liveStream
+    );
+
+  liveProcessor =
+    liveAudioContext.createScriptProcessor(
+      4096,
+      1,
+      1
+    );
+
+  liveProcessor.onaudioprocess =
+    (event) => {
+
+      const input =
+        event.inputBuffer.getChannelData(0);
+
+      sendLiveAudio(input);
+    };
+
+  liveSource.connect(liveProcessor);
+
+  liveProcessor.connect(
+    liveAudioContext.destination
+  );
+}
+
+async function stopLiveMicrophone() {
+
+  try {
+    liveProcessor?.disconnect();
+    liveSource?.disconnect();
+
+    if (liveAudioContext) {
+      await liveAudioContext.close();
+    }
+  } catch {}
+
+  if (liveStream) {
+    liveStream
+      .getTracks()
+      .forEach(track => track.stop());
+  }
+
+  liveProcessor = null;
+  liveSource = null;
+  liveAudioContext = null;
+  liveStream = null;
+}
+
+async function startLiveCall() {
+
+  if (liveSocket) return;
+
+  try {
+
+    liveSetStatus(
+      'جاري الاتصال…'
+    );
+
+    const response =
+      await fetch('/api/live/config');
+
+    const config =
+      await response.json();
+
+    if (
+      !response.ok ||
+      !config.apiKey
+    ) {
+      throw new Error(
+        config.error ||
+        'Gemini Live غير مفعّل'
+      );
+    }
+
+    const wsUrl =
+      'wss://generativelanguage.googleapis.com/ws/' +
+      'google.ai.generativelanguage.v1beta.' +
+      'GenerativeService.BidiGenerateContent' +
+      '?key=' +
+      encodeURIComponent(config.apiKey);
+
+    liveSocket =
+      new WebSocket(wsUrl);
+
+    liveSocket.onopen =
+      async () => {
+
+        liveSocket.send(
+          JSON.stringify({
+            setup: {
+              model:
+                `models/${config.model}`,
+
+              responseModalities: [
+                'AUDIO'
+              ],
+
+              systemInstruction: {
+                parts: [
+                  {
+                    text:
+                      'أنت مساعد صوتي عربي داخل تطبيق ذكا صناعي. تحدث بالعربية بشكل طبيعي وودود ومختصر. تعامل مع المستخدم كمكالمة صوتية مباشرة.'
+                  }
+                ]
+              },
+
+              inputAudioTranscription: {},
+
+              outputAudioTranscription: {}
+            }
+          })
+        );
+
+        await startLiveMicrophone();
+
+        liveCallBtn
+          ?.classList
+          .add('hidden');
+
+        liveStopBtn
+          ?.classList
+          .remove('hidden');
+
+        liveSetStatus(
+          'متصل — تحدث الآن 🎙️',
+          true
+        );
+      };
+
+    liveSocket.onmessage =
+      (event) => {
+
+        try {
+
+          const data =
+            JSON.parse(event.data);
+
+          const content =
+            data.serverContent;
+
+          if (!content) return;
+
+          if (
+            content.inputTranscription?.text
+          ) {
+            liveAddMessage(
+              'user',
+              content.inputTranscription.text
+            );
+          }
+
+          if (
+            content.outputTranscription?.text
+          ) {
+            liveAddMessage(
+              'ai',
+              content.outputTranscription.text
+            );
+          }
+
+          if (content.modelTurn?.parts) {
+
+            for (
+              const part
+              of content.modelTurn.parts
+            ) {
+
+              if (
+                part.inlineData?.data
+              ) {
+                playGeminiPCM(
+                  part.inlineData.data
+                );
+              }
+
+              if (part.text) {
+                liveAddMessage(
+                  'ai',
+                  part.text
+                );
+              }
+            }
+          }
+
+        } catch (error) {
+          console.error(
+            'Live message error:',
+            error
+          );
+        }
+      };
+
+    liveSocket.onerror =
+      () => {
+
+        liveSetStatus(
+          '⚠️ خطأ في الاتصال'
+        );
+      };
+
+    liveSocket.onclose =
+      async () => {
+
+        await stopLiveMicrophone();
+
+        liveSocket = null;
+
+        liveCallBtn
+          ?.classList
+          .remove('hidden');
+
+        liveStopBtn
+          ?.classList
+          .add('hidden');
+
+        liveSetStatus(
+          'تم إنهاء المكالمة'
+        );
+      };
+
+  } catch (error) {
+
+    console.error(error);
+
+    await stopLiveMicrophone();
+
+    if (liveSocket) {
+      try {
+        liveSocket.close();
+      } catch {}
+    }
+
+    liveSocket = null;
+
+    liveSetStatus(
+      '⚠️ ' +
+      (
+        error.message ||
+        'تعذر بدء المكالمة'
+      )
+    );
+  }
+}
+
+async function stopLiveCall() {
+
+  await stopLiveMicrophone();
+
+  if (liveSocket) {
+    try {
+      liveSocket.close();
+    } catch {}
+  }
+
+  liveSocket = null;
+
+  liveCallBtn
+    ?.classList
+    .remove('hidden');
+
+  liveStopBtn
+    ?.classList
+    .add('hidden');
+
+  liveSetStatus(
+    'تم إنهاء المكالمة'
+  );
+}
+
+liveCallBtn?.addEventListener(
+  'click',
+  startLiveCall
+);
+
+liveStopBtn?.addEventListener(
+  'click',
+  stopLiveCall
+);
