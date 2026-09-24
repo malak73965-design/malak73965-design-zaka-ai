@@ -21,12 +21,27 @@ const key = (name) => {
   return value;
 };
 
-const OPENAI_MODELS = list('OPENAI_MODELS', safe(process.env.OPENAI_MODEL));
-const GEMINI_MODELS = list('GEMINI_MODELS', safe(process.env.GEMINI_MODEL));
-const GEMINI_IMAGE_MODELS = list('GEMINI_IMAGE_MODELS', safe(process.env.GEMINI_IMAGE_MODEL) || 'gemini-3.1-flash-image,gemini-3.1-flash-lite-image,gemini-3-pro-image,gemini-2.5-flash-image');
-const PIXAZO_IMAGE_MODELS = list('PIXAZO_IMAGE_MODELS', safe(process.env.PIXAZO_IMAGE_MODEL) || 'flux,gpt-image-2-5-flare');
-const PIXAZO_VIDEO_MODELS = list('PIXAZO_VIDEO_MODELS', safe(process.env.PIXAZO_VIDEO_MODEL) || 'ltx,ltx-2-5-lite,ltx-2-5-pro');
+const OPENAI_MODELS = list(
+  'OPENAI_MODELS',
+  safe(process.env.OPENAI_MODEL)
+);
 
+const GEMINI_MODELS = list(
+  'GEMINI_MODELS',
+  safe(process.env.GEMINI_MODEL)
+);
+
+const GEMINI_IMAGE_MODELS = list(
+  'GEMINI_IMAGE_MODELS'
+);
+
+const PIXAZO_IMAGE_MODELS = list(
+  'PIXAZO_IMAGE_MODELS'
+);
+
+const PIXAZO_VIDEO_MODELS = list(
+  'PIXAZO_VIDEO_MODELS'
+);
 const openText = (d) => safe(d?.output_text) || ((d?.output || []).flatMap((x) => x?.content || []).map((x) => x?.text || '')).join('\n').trim();
 const gemText = (d) => (d?.candidates?.[0]?.content?.parts || []).map((p) => p?.text || '').join('').trim();
 const mediaUrl = (v) => {
@@ -50,14 +65,20 @@ app.get('/api/config', (_q, res) => res.json({
     elevenlabs: !!process.env.ELEVENLABS_API_KEY,
     pixazo: !!process.env.PIXAZO_API_KEY,
     telegram: !!(process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID),
+    geminiLive: !!process.env.GEMINI_API_KEY,
   },
+
   models: {
     openai: OPENAI_MODELS,
     gemini: GEMINI_MODELS,
     geminiImage: GEMINI_IMAGE_MODELS,
     pixazoImage: PIXAZO_IMAGE_MODELS,
     pixazoVideo: PIXAZO_VIDEO_MODELS,
-  },
+
+    geminiLive: [
+      'gemini-2.5-flash-native-audio-preview-12-2025'
+    ]
+  }
 }));
 
 app.post('/api/chat', async (req, res) => {
@@ -269,5 +290,31 @@ app.post('/api/telegram/send', async (req, res) => {
   }
 });
 
+
 app.use((_q, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 app.listen(PORT, '0.0.0.0', () => console.log(`Zaka AI listening on ${PORT}`));
+
+
+
+
+// ==========================================
+// GEMINI LIVE CONFIG
+// ==========================================
+
+app.get('/api/live/config', (_req, res) => {
+  try {
+    const k = key('GEMINI_API_KEY');
+
+    res.json({
+      ok: true,
+      apiKey: k,
+      model: safe(process.env.GEMINI_LIVE_MODEL)
+        || 'gemini-2.5-flash-native-audio-preview-12-2025'
+    });
+
+  } catch (e) {
+    res.status(500).json({
+      error: e.message || 'Gemini Live is not configured'
+    });
+  }
+});
