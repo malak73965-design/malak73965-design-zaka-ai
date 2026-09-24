@@ -25,12 +25,12 @@ const requireKey = (name) => {
   return value;
 };
 
-const DEFAULT_GEMINI_IMAGE_MODELS = [
-  'gemini-3.1-flash-image'
-];
-
-const DEFAULT_PIXAZO_IMAGE_MODELS = [
-  'flux'
+const DEFAULT_GEMINI_IMAGE_MODELS = ['gemini-3.1-flash-image'];
+const DEFAULT_PIXAZO_IMAGE_MODELS = ['flux'];
+const DEFAULT_PIXAZO_VIDEO_MODELS = [
+  'ltx',
+  'ltx-2-5-lite',
+  'ltx-2-5-pro'
 ];
 const DEFAULT_LIVE_MODEL = safe(process.env.GEMINI_LIVE_MODEL) || 'gemini-3.8-live';
 
@@ -368,23 +368,42 @@ app.post('/api/chat', async (req, res) => {
   }
 });
 
+function extractInteractionsImage(data) {
+  const direct = data?.output_image;
+  if (direct?.data) {
+    return {
+      mimeType: safe(direct.mime_type || direct.mimeType) || 'image/png',
+      data: direct.data
+    };
+  }
+
+  for (const step of (Array.isArray(data?.steps) ? data.steps : [])) {
+    for (const content of (Array.isArray(step?.content) ? step.content : [])) {
+      if (content?.type === 'image' && content?.data) {
+        return {
+          mimeType: safe(content.mime_type || content.mimeType) || 'image/png',
+          data: content.data
+        };
+      }
+    }
+  }
+
+  return null;
+}
+
 app.post('/api/gemini-image', async (req, res) => {
   try {
     const key = requireKey('GEMINI_API_KEY');
-
     const available = envList(
       'GEMINI_IMAGE_MODELS',
       'GEMINI_IMAGE_MODEL',
       DEFAULT_GEMINI_IMAGE_MODELS
     );
-
-    const model = safe(req.body?.model) || available[0] || 'gemini-3.1-flash-image';
+    const requestedModel = safe(req.body?.model);
     const prompt = safe(req.body?.prompt);
 
     if (!prompt) {
-      return res.status(400).json({
-        error: 'اكتب وصف الصورة أولًا.'
-      });
+      return res.status(400).json({ error: 'اكتب وصف الصورة أولًا.' });
     }
 
     const responseFormat = {
@@ -394,86 +413,68 @@ app.post('/api/gemini-image', async (req, res) => {
       image_size: safe(req.body?.imageSize) || '1K'
     };
 
-    const r = await fetch(
-      'https://generativelanguage.googleapis.com/v1beta/interactions',
-      {
-        method: 'POST',
-        headers: {
-          'x-goog-api-key': key,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          model,
-          input: prompt,
-          response_format: responseFormat
-        })
-      }
-    );
+    const candidates = [
+      ...(requestedModel && available.includes(requestedModel) ? [requestedModel] : []),
+      ...available.filter((id) => id !== requestedModel),
+      'gemini-3.1-flash-image'
+    ].filter((id, index, list) => id && list.indexOf(id) === index);
 
-    const data = await r.json();
+    let lastError = null;
 
-    if (!r.ok) {
-      return res.status(r.status).json({
-        error:
-          data?.error?.message ||
-          data?.message ||
-          `فشل توليد صورة Gemini (${r.status}).`
-      });
-    }
-
-    // الطريقة الأولى: output_image
-    let image = data?.output_image;
-
-    // الطريقة الثانية: steps -> model_output -> image
-    if (!image?.data && Array.isArray(data?.steps)) {
-      for (const step of data.steps) {
-        if (step?.type !== 'model_output') continue;
-
-        const content = Array.isArray(step?.content)
-          ? step.content
-          : [];
-
-        const found = content.find(
-          (item) =>
-            item?.type === 'image' &&
-            item?.data
-        );
-
-        if (found) {
-          image = {
-            data: found.data,
-            mime_type: found.mime_type
-          };
-          break;
+    for (const model of candidates) {
+      const r = await fetch(
+        'https://generativelanguage.googleapis.com/v1beta/interactions',
+        {
+          method: 'POST',
+          headers: {
+            'x-goog-api-key': key,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            model,
+            input: prompt,
+            response_format: responseFormat
+          })
         }
+      );
+
+      const text = await r.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch {
+        data = { raw: text };
       }
+
+      if (!r.ok) {
+        lastError = {
+          status: r.status,
+          message: data?.error?.message || data?.message || 'فشل طلب Gemini.'
+        };
+        continue;
+      }
+
+      const image = extractInteractionsImage(data);
+      if (image?.data) {
+        return res.json({
+          ok: true,
+          provider: 'gemini',
+          model,
+          imageUrl: `data:${image.mimeType};base64,${image.data}`
+        });
+      }
+
+      lastError = { status: 502, message: 'Gemini استجاب بدون صورة.' };
     }
 
-    if (!image?.data) {
-      return res.status(502).json({
-        error: 'Gemini استجاب لكن لم تُرجع الاستجابة بيانات صورة.'
-      });
-    }
-
-    const mime =
-      safe(image.mime_type) ||
-      safe(image.mimeType) ||
-      'image/png';
-
-    return res.json({
-      ok: true,
+    return res.status(lastError?.status || 502).json({
+      error: lastError?.message || 'فشل توليد صورة Gemini.',
       provider: 'gemini',
-      model,
-      imageUrl: `data:${mime};base64,${image.data}`
+      triedModels: candidates
     });
-
   } catch (error) {
-    console.error('Gemini image error:', error);
-
     return res.status(500).json({
-      error:
-        error.message ||
-        'حدث خطأ في توليد الصورة.'
+      error: error.message || 'حدث خطأ في توليد الصورة.'
     });
   }
 });
@@ -556,87 +557,4 @@ app.post('/api/video', async (req, res) => {
     if (!response.ok) return res.status(response.status).json({ error: data?.error || data?.message || 'فشل توليد الفيديو.' });
 
     const videoUrl = recursiveMediaUrl(data);
-    const jobId = jobIdFrom(data);
-    return res.json({ ok: true, provider: 'pixazo', model, videoUrl, jobId, status: data?.status || '' });
-  } catch (error) {
-    res.status(500).json({ error: error.message || 'تعذر توليد الفيديو.' });
-  }
-});
-
-app.post('/api/pixazo/status', async (req, res) => {
-  try {
-    const jobId = safe(req.body?.jobId);
-    if (!jobId) return res.status(400).json({ error: 'jobId مطلوب.' });
-    const key = requireKey('PIXAZO_API_KEY');
-    const r = await fetch(`https://gateway.pixazo.ai/v2/requests/status/${encodeURIComponent(jobId)}`, {
-      headers: { 'Ocp-Apim-Subscription-Key': key }
-    });
-    const data = await r.json();
-    if (!r.ok) return res.status(r.status).json({ error: data?.error || data?.message || 'تعذر فحص حالة المهمة.' });
-    res.json({ ok: true, status: data?.status || '', mediaUrl: recursiveMediaUrl(data), raw: data });
-  } catch (error) {
-    res.status(500).json({ error: error.message || 'تعذر فحص المهمة.' });
-  }
-});
-
-app.post('/api/live-token', async (_req, res) => {
-  try {
-    const key = requireKey('GEMINI_API_KEY');
-    const model = DEFAULT_LIVE_MODEL;
-    const expireTime = new Date(Date.now() + 30 * 60_000).toISOString();
-    const newSessionExpireTime = new Date(Date.now() + 60_000).toISOString();
-
-    const r = await fetch('https://generativelanguage.googleapis.com/v1beta/auth_tokens', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-goog-api-key': key
-      },
-      body: JSON.stringify({
-        uses: 1,
-        expireTime,
-        newSessionExpireTime,
-        liveConnectConstraints: {
-          model: `models/${model}`,
-          config: {
-            responseModalities: ['AUDIO'],
-            sessionResumption: {}
-          }
-        }
-      })
-    });
-    const data = await r.json();
-    if (!r.ok) return res.status(r.status).json({ error: data?.error?.message || 'تعذر إنشاء رمز الاتصال الصوتي.' });
-    if (!data?.name) return res.status(502).json({ error: 'Gemini لم يُرجع رمز اتصال صوتي صالحًا.' });
-    res.json({ ok: true, token: data.name, model });
-  } catch (error) {
-    res.status(500).json({ error: error.message || 'تعذر بدء المكالمة اللايف.' });
-  }
-});
-
-app.post('/api/telegram/send', async (req, res) => {
-  try {
-    const token = requireKey('TELEGRAM_BOT_TOKEN');
-    const chatId = safe(req.body?.chatId) || safe(process.env.TELEGRAM_CHAT_ID);
-    const text = safe(req.body?.text);
-    if (!chatId) return res.status(400).json({ error: 'TELEGRAM_CHAT_ID غير مضبوط.' });
-    if (!text) return res.status(400).json({ error: 'لا يوجد نص للإرسال.' });
-
-    const r = await fetch(`https://api.telegram.org/bot${encodeURIComponent(token)}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: chatId, text })
-    });
-    const data = await r.json();
-    if (!r.ok) return res.status(r.status).json({ error: data?.description || 'فشل إرسال Telegram.' });
-    res.json({ ok: true });
-  } catch (error) {
-    res.status(500).json({ error: error.message || 'تعذر إرسال Telegram.' });
-  }
-});
-
-app.use((_req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
-
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Zaka AI listening on ${PORT}`);
-});
+  
