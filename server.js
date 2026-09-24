@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const app = express();
-const PORT = Number(process.env.PORT || 10000);
+const PORT = Number(process.env.PORT) || 3000;
 
 app.use(express.json({ limit: '12mb' }));
 app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'] }));
@@ -178,20 +178,10 @@ async function discoverOpenAIModels(force = false) {
 
   try {
     const r = await fetch('https://api.openai.com/v1/models', {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+      headers: {
+        Authorization: `Bearer ${key}`
+      }
+    });
 
     const data = await r.json();
 
@@ -262,7 +252,7 @@ async function discoverOpenAIModels(force = false) {
   }
 }
 
-async function discoverElevenVoice() {
+async function discoverElevenLabsVoices() {
   const key = safe(process.env.ELEVENLABS_API_KEY);
 
   if (!key) return '';
@@ -323,6 +313,8 @@ async function discoverElevenVoice() {
     return '';
   }
 }
+
+const discoverElevenVoice = discoverElevenLabsVoices;
 
 function extractGeminiText(data) {
   const parts =
@@ -494,10 +486,6 @@ app.get('/api/health', (_req, res) => {
   });
 });
 
-
-
-
-
 app.get('/api/config', async (req, res) => {
   try {
     const geminiModels = await discoverGeminiModels();
@@ -524,7 +512,7 @@ app.get('/api/config', async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
-      error: error.message || 'تعذر تحميل إعدادات النماذج.'
+      error: error.message || 'تعذ�� تحميل إعدادات النماذج.'
     });
   }
 });
@@ -689,11 +677,6 @@ app.post('/api/gemini-image', async (req, res) => {
   }
 });
 
-
-
-
-
-
 app.post('/api/image', async (req, res) => {
   try {
     const model =
@@ -759,7 +742,6 @@ app.post('/api/image', async (req, res) => {
   }
 });
 
-
 app.post('/api/status', async (req, res) => {
   try {
     const jobId = safe(req.body?.jobId);
@@ -799,7 +781,6 @@ app.post('/api/status', async (req, res) => {
     });
   }
 });
-
 
 app.post('/api/tts', async (req, res) => {
   try {
@@ -850,8 +831,7 @@ app.post('/api/tts', async (req, res) => {
       });
     }
 
-    const buffer =
-      Buffer.from(await response.arrayBuffer());
+    const buffer = Buffer.from(await response.arrayBuffer());
 
     res.setHeader(
       'Content-Type',
@@ -868,8 +848,6 @@ app.post('/api/tts', async (req, res) => {
   }
 });
 
-
-
 app.post('/api/telegram/send', async (req, res) => {
   try {
     const token = requireKey('TELEGRAM_BOT_TOKEN');
@@ -879,7 +857,7 @@ app.post('/api/telegram/send', async (req, res) => {
 
     if (!chatId || !text) {
       return res.status(400).json({
-        error: 'أدخل chatId والنص.'
+        error: 'أ��خل chatId والنص.'
       });
     }
 
@@ -920,7 +898,6 @@ app.post('/api/telegram/send', async (req, res) => {
   }
 });
 
-
 app.post('/api/live-token', async (req, res) => {
   try {
     const key = requireKey('GEMINI_API_KEY');
@@ -944,7 +921,6 @@ app.post('/api/live-token', async (req, res) => {
   }
 });
 
-
 app.get('/api/status', (req, res) => {
   res.json({
     ok: true,
@@ -954,10 +930,6 @@ app.get('/api/status', (req, res) => {
     image: true
   });
 });
-
-
-const PORT =
-  Number(process.env.PORT) || 3000;
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(
