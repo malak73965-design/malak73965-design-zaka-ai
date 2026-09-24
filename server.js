@@ -26,7 +26,7 @@ const requireKey = (name) => {
 };
 
 const DEFAULT_GEMINI_IMAGE_MODELS = ['gemini-3.1-flash-image'];
-const DEFAULT_PIXAZO_IMAGE_MODELS = ['PIXAZO_API_KEY'];
+const PIXAZO_API_KEY = ['PIXAZO'];
 const DEFAULT_PIXAZO_VIDEO_MODELS = [
   'ltx',
   'ltx-2-5-lite',
