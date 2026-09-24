@@ -26,12 +26,12 @@ const requireKey = (name) => {
 };
 
 const DEFAULT_GEMINI_IMAGE_MODELS = [
-  'gemini-3.1-flash-image',
-  'gemini-3-pro-image',
-  'gemini-3.1-flash-lite-image'
+  'gemini-3.1-flash-image'
 ];
-const DEFAULT_PIXAZO_IMAGE_MODELS = ['flux', 'gpt-image-2-5-flare'];
-const DEFAULT_PIXAZO_VIDEO_MODELS = ['ltx', 'ltx-2-5-lite', 'ltx-2-5-pro'];
+
+const DEFAULT_PIXAZO_IMAGE_MODELS = [
+  'flux'
+];
 const DEFAULT_LIVE_MODEL = safe(process.env.GEMINI_LIVE_MODEL) || 'gemini-3.8-live';
 
 let geminiCache = { at: 0, models: [] };
