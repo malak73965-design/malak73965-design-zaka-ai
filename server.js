@@ -557,4 +557,87 @@ app.post('/api/video', async (req, res) => {
     if (!response.ok) return res.status(response.status).json({ error: data?.error || data?.message || 'فشل توليد الفيديو.' });
 
     const videoUrl = recursiveMediaUrl(data);
-  
+    const jobId = jobIdFrom(data);
+    return res.json({ ok: true, provider: 'pixazo', model, videoUrl, jobId, status: data?.status || '' });
+  } catch (error) {
+    res.status(500).json({ error: error.message || 'تعذر توليد الفيديو.' });
+  }
+});
+
+app.post('/api/pixazo/status', async (req, res) => {
+  try {
+    const jobId = safe(req.body?.jobId);
+    if (!jobId) return res.status(400).json({ error: 'jobId مطلوب.' });
+    const key = requireKey('PIXAZO_API_KEY');
+    const r = await fetch(`https://gateway.pixazo.ai/v2/requests/status/${encodeURIComponent(jobId)}`, {
+      headers: { 'Ocp-Apim-Subscription-Key': key }
+    });
+    const data = await r.json();
+    if (!r.ok) return res.status(r.status).json({ error: data?.error || data?.message || 'تعذر فحص حالة المهمة.' });
+    res.json({ ok: true, status: data?.status || '', mediaUrl: recursiveMediaUrl(data), raw: data });
+  } catch (error) {
+    res.status(500).json({ error: error.message || 'تعذر فحص المهمة.' });
+  }
+});
+
+app.post('/api/live-token', async (_req, res) => {
+  try {
+    const key = requireKey('GEMINI_API_KEY');
+    const model = DEFAULT_LIVE_MODEL;
+    const expireTime = new Date(Date.now() + 30 * 60_000).toISOString();
+    const newSessionExpireTime = new Date(Date.now() + 60_000).toISOString();
+
+    const r = await fetch('https://generativelanguage.googleapis.com/v1beta/auth_tokens', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': key
+      },
+      body: JSON.stringify({
+        uses: 1,
+        expireTime,
+        newSessionExpireTime,
+        liveConnectConstraints: {
+          model: `models/${model}`,
+          config: {
+            responseModalities: ['AUDIO'],
+            sessionResumption: {}
+          }
+        }
+      })
+    });
+    const data = await r.json();
+    if (!r.ok) return res.status(r.status).json({ error: data?.error?.message || 'تعذر إنشاء رمز الاتصال الصوتي.' });
+    if (!data?.name) return res.status(502).json({ error: 'Gemini لم يُرجع رمز اتصال صوتي صالحًا.' });
+    res.json({ ok: true, token: data.name, model });
+  } catch (error) {
+    res.status(500).json({ error: error.message || 'تعذر بدء المكالمة اللايف.' });
+  }
+});
+
+app.post('/api/telegram/send', async (req, res) => {
+  try {
+    const token = requireKey('TELEGRAM_BOT_TOKEN');
+    const chatId = safe(req.body?.chatId) || safe(process.env.TELEGRAM_CHAT_ID);
+    const text = safe(req.body?.text);
+    if (!chatId) return res.status(400).json({ error: 'TELEGRAM_CHAT_ID غير مضبوط.' });
+    if (!text) return res.status(400).json({ error: 'لا يوجد نص للإرسال.' });
+
+    const r = await fetch(`https://api.telegram.org/bot${encodeURIComponent(token)}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: chatId, text })
+    });
+    const data = await r.json();
+    if (!r.ok) return res.status(r.status).json({ error: data?.description || 'فشل إرسال Telegram.' });
+    res.json({ ok: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message || 'تعذر إرسال Telegram.' });
+  }
+});
+
+app.use((_req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
+
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Zaka AI listening on ${PORT}`);
+});
