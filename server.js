@@ -486,11 +486,18 @@ function pixazoImagePath(model) {
   return `${model}/text-to-image`;
 }
 
+function normalizePixazoPath(pathname = '') {
+  return String(pathname || '')
+    .replace(/^\/+/, '')
+    .replace(/\/+$/, '');
+}
+
 async function pixazoPost(pathname, body) {
   const key = requireKey('PIXAZO_API_KEY');
+  const url = `https://gateway.pixazo.ai/${normalizePixazoPath(pathname)}`;
 
   const response = await fetch(
-    `https://gateway.pixazo.ai/${pathname}`,
+    url,
     {
       method: 'POST',
       headers: {
@@ -880,7 +887,7 @@ async function pixazoStatusHandler(req, res) {
     }
 
     const result = await pixazoPost(
-      `/v1/images/${encodeURIComponent(jobId)}`,
+      `v1/images/${encodeURIComponent(jobId)}`,
       {}
     );
 
@@ -1027,12 +1034,11 @@ app.post('/api/telegram/send', async (req, res) => {
       }
     );
 
-    const data =
-      await response.json();
+    const data = await response.json();
 
     if (!response.ok || !data?.ok) {
-      return res.status(response.status          data?.description ||
-          'فشل إرسال الرسالة إلى Telegram.'
+      return res.status(response.status || 500).json({
+        error: data?.description || 'فشل إرسال الرسالة إلى Telegram.'
       });
     }
 
@@ -1099,6 +1105,3 @@ app.listen(PORT, '0.0.0.0', () => {
     `Zaka AI server running on port ${PORT}`
   );
 });
-``الصوت
-TELEGRAM_BOT_TOKEN=توكن_البوت
-TELEGRAM_CHAT_ID=معرف_المحادثة
