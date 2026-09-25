@@ -19,7 +19,11 @@
   function enhanceTabs() {
     $$('.mode-tab').forEach((tab) => {
       tab.addEventListener('click', () => {
-        $$('.mode-tab').forEach((item) => item.setAttribute('aria-selected', String(item === tab)));
+        $$('.mode-tab').forEach((item) => {
+          const active = item === tab;
+          item.classList.toggle('active', active);
+          item.setAttribute('aria-selected', String(active));
+        });
         closeSidebarOnMobile();
       });
     });
@@ -43,10 +47,13 @@
     if (!('IntersectionObserver' in window)) return;
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
-        if (entry.isIntersecting) entry.target.classList.add('is-visible');
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          observer.unobserve(entry.target);
+        }
       });
     }, { threshold: .08 });
-    $$('.panel, .hero-card').forEach((element) => observer.observe(element));
+    $$('.panel, .hero-card, .composer-wrap').forEach((element) => observer.observe(element));
   }
 
   function improveErrors() {
