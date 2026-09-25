@@ -1,178 +1,533 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#070b14" />
-  <meta name="description" content="ذكا صناعي — شات، صور، فيديو ومكالمة لايف مع الذكاء الاصطناعي" />
-  <link rel="manifest" href="/manifest.webmanifest" />
-  <link rel="stylesheet" href="/style.css" />
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E✦%3C/text%3E%3C/svg%3E" />
+  <meta charset="utf-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  >
+
+  <meta name="theme-color" content="#070b14">
+  <meta
+    name="description"
+    content="ذكا صناعي — محادثة وتوليد صور بالذكاء الاصطناعي"
+  >
+
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="stylesheet" href="/style.css">
+
+  <link
+    rel="icon"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E✦%3C/text%3E%3C/svg%3E"
+  >
+
   <title>ذكا صناعي</title>
 </head>
+
 <body>
   <div class="app-shell">
+
     <aside class="sidebar" id="sidebar">
       <div class="brand-row">
         <div class="brand-mark">✦</div>
+
         <div>
           <div class="brand-name">ذكا صناعي</div>
           <div class="brand-sub">كل أدوات الذكاء في مكان واحد</div>
         </div>
       </div>
 
-      <button class="new-chat-btn" id="newChatBtn">＋ محادثة جديدة</button>
+      <button
+        type="button"
+        class="new-chat-btn"
+        id="newChatBtn"
+      >
+        ＋ محادثة جديدة
+      </button>
 
       <div class="side-section-title">المحادثات</div>
+
       <div class="history" id="history"></div>
 
       <div class="sidebar-bottom">
-        <button class="side-action" id="themeBtn">🌙 <span>الوضع الليلي</span></button>
-        <button class="side-action" id="settingsBtn">⚙️ <span>الإعدادات</span></button>
-        <div class="connection-pill" id="connectionPill"><span class="status-dot"></span><span>جاري الفحص...</span></div>
+        <button
+          type="button"
+          class="side-action"
+          id="themeBtn"
+        >
+          🌙 <span>الوضع الليلي</span>
+        </button>
+
+        <button
+          type="button"
+          class="side-action"
+          id="settingsBtn"
+        >
+          ⚙️ <span>الإعدادات</span>
+        </button>
+
+        <div
+          class="connection-pill"
+          id="connectionPill"
+        >
+          <span class="status-dot"></span>
+          <span>جاري الفحص...</span>
+        </div>
       </div>
     </aside>
 
     <main class="main">
       <header class="topbar">
-        <button class="icon-btn mobile-only" id="menuBtn" aria-label="القائمة">☰</button>
+        <button
+          type="button"
+          class="icon-btn mobile-only"
+          id="menuBtn"
+          aria-label="القائمة"
+        >
+          ☰
+        </button>
+
         <div class="top-title">
           <div class="eyebrow">AI HUB</div>
           <div class="top-heading">ذكا صناعي</div>
         </div>
+
         <div class="top-actions">
-          <button class="ghost-btn" id="newTopBtn">＋ جديد</button>
-          <button class="icon-btn" id="clearBtn" aria-label="مسح المحادثة">🗑️</button>
+          <button
+            type="button"
+            class="ghost-btn"
+            id="newTopBtn"
+          >
+            ＋ جديد
+          </button>
+
+          <button
+            type="button"
+            class="icon-btn"
+            id="clearBtn"
+            aria-label="مسح المحادثة"
+          >
+            🗑️
+          </button>
         </div>
       </header>
 
       <section class="workspace">
+
         <div class="hero-card" id="heroCard">
           <div class="hero-orb">✦</div>
+
           <div class="hero-copy">
             <div class="hero-kicker">مساعدك الذكي</div>
+
             <h1>وش تبغى تسوي اليوم؟</h1>
-            <p>تحدث، أنشئ صورة، ولّد فيديو أو ادخل مكالمة صوتية مباشرة.</p>
+
+            <p>
+              تحدث مع الذكاء الاصطناعي أو أنشئ صورة من وصفك.
+            </p>
           </div>
+
           <div class="hero-chips">
-            <button class="quick-chip" data-quick="اكتب لي فكرة مشروع مبتكرة">💡 فكرة مشروع</button>
-            <button class="quick-chip" data-quick="اكتب لي وصفًا سينمائيًا لصورة جميلة">🎨 فكرة صورة</button>
-                </div>
+            <button
+              type="button"
+              class="quick-chip"
+              data-quick="اكتب لي فكرة مشروع مبتكرة"
+            >
+              💡 فكرة مشروع
+            </button>
+
+            <button
+              type="button"
+              class="quick-chip"
+              data-quick="اكتب لي وصفًا سينمائيًا لصورة جميلة"
+            >
+              🎨 فكرة صورة
+            </button>
+
+            <button
+              type="button"
+              class="quick-chip"
+              data-quick="اكتب لي خطة لتعلم البرمجة"
+            >
+              📚 خطة تعلم
+            </button>
+          </div>
         </div>
 
-        <div class="mode-tabs" id="modeTabs" role="tablist">
-          <button class="mode-tab active" data-mode="chat">💬 <span>محادثة</span></button>
-          <button class="mode-tab" data-mode="image">🖼️ <span>صورة</span></button>
-          <button class="mode-tab live-tab" data-mode="live">🎙️ <span>مكالمة لايف</span><i></i></button>
+        <div
+          class="mode-tabs"
+          id="modeTabs"
+          role="tablist"
+        >
+          <button
+            type="button"
+            class="mode-tab active"
+            data-mode="chat"
+          >
+            💬 <span>محادثة</span>
+          </button>
+
+          <button
+            type="button"
+            class="mode-tab"
+            data-mode="image"
+          >
+            🖼️ <span>صورة</span>
+          </button>
+
+          <button
+            type="button"
+            class="mode-tab live-tab"
+            data-mode="live"
+          >
+            🎙️ <span>مكالمة لايف</span>
+            <i></i>
+          </button>
         </div>
 
-        <section class="panel chat-panel" id="chatPanel">
+        <section
+          class="panel chat-panel"
+          id="chatPanel"
+        >
           <div class="provider-bar">
             <div class="field-group grow">
               <label for="chatProvider">المزود</label>
               <select id="chatProvider"></select>
             </div>
+
             <div class="field-group grow">
               <label for="chatModel">النموذج</label>
               <select id="chatModel"></select>
             </div>
-            <button class="round-btn" id="refreshModelsBtn" title="تحديث النماذج">↻</button>
+
+            <button
+              type="button"
+              class="round-btn"
+              id="refreshModelsBtn"
+              title="تحديث النماذج"
+            >
+              ↻
+            </button>
           </div>
 
-          <div class="chat-scroll" id="chatScroll">
-            <div class="empty-state" id="emptyState">
+          <div
+            class="chat-scroll"
+            id="chatScroll"
+          >
+            <div
+              class="empty-state"
+              id="emptyState"
+            >
               <div class="empty-icon">✦</div>
               <h2>جاهز لك</h2>
-              <p>اختر النموذج واكتب رسالتك. النماذج المتاحة تُكتشف تلقائيًا من API.</p>
+              <p>
+                اختر النموذج واكتب رسالتك.
+              </p>
             </div>
           </div>
         </section>
 
-        <section class="panel generator-panel hidden" id="imagePanel">
+        <section
+          class="panel generator-panel hidden"
+          id="imagePanel"
+        >
           <div class="generator-head">
             <div>
               <div class="section-kicker">IMAGE STUDIO</div>
+
               <h2>توليد الصور</h2>
-              <p>Gemini Image أو Pixazo في واجهة واحدة.</p>
+
+              <p>
+                أنشئ صورة من وصف نصي باستخدام Gemini أو Pixazo.
+              </p>
             </div>
+
             <div class="badge">⚡ سريع</div>
           </div>
+
           <div class="provider-grid">
-            <div class="field-group"><label for="imageProvider">المزود</label><select id="imageProvider"></select></div>
-            <div class="field-group"><label for="imageModel">النموذج</label><select id="imageModel"></select></div>
-            <div class="field-group"><label for="imageAspect">النسبة</label><select id="imageAspect"><option>1:1</option><option>16:9</option><option>9:16</option><option>4:3</option><option>3:4</option><option>21:9</option></select></div>
-            <div class="field-group"><label for="imageSize">الدقة</label><select id="imageSize"><option>1K</option><option>2K</option><option>4K</option></select></div>
+            <div class="field-group">
+              <label for="imageProvider">المزود</label>
+              <select id="imageProvider"></select>
+            </div>
+
+            <div class="field-group">
+              <label for="imageModel">النموذج</label>
+              <select id="imageModel"></select>
+            </div>
+
+            <div class="field-group">
+              <label for="imageAspect">النسبة</label>
+
+              <select id="imageAspect">
+                <option value="1:1">1:1</option>
+                <option value="16:9">16:9</option>
+                <option value="9:16">9:16</option>
+                <option value="4:3">4:3</option>
+              </select>
+            </div>
+
+            <div class="field-group">
+              <label for="imageSize">الدقة</label>
+
+              <select id="imageSize">
+                <option value="1K">1K</option>
+                <option value="2K">2K</option>
+                <option value="4K">4K</option>
+              </select>
+            </div>
           </div>
-          <form class="generator-form" id="imageForm">
-            <textarea id="imagePrompt" placeholder="مثال: مدينة عربية مستقبلية عند الغروب، إضاءة سينمائية، تفاصيل فائقة..."></textarea>
+
+          <form
+            class="generator-form"
+            id="imageForm"
+          >
+            <textarea
+              id="imagePrompt"
+              placeholder="مثال: مدينة عربية مستقبلية عند الغروب، إضاءة سينمائية، تفاصيل فائقة..."
+            ></textarea>
+
             <div class="generator-actions">
-              <button type="button" class="secondary-btn" data-fill="صورة واقعية سينمائية عالية التفاصيل">✨ مثال</button>
-              <button class="primary-btn" id="imageSubmitBtn">إنشاء الصورة <span>➜</span></button>
+              <button
+                type="button"
+                class="secondary-btn"
+                data-fill="صورة واقعية سينمائية عالية التفاصيل"
+              >
+                ✨ مثال
+              </button>
+
+              <button
+                type="submit"
+                class="primary-btn"
+                id="imageSubmitBtn"
+              >
+                إنشاء الصورة <span>➜</span>
+              </button>
             </div>
           </form>
-          <div class="result-box" id="imageResult"></div>
+
+          <div
+            class="result-box"
+            id="imageResult"
+          ></div>
         </section>
 
-
-        <section class="panel live-panel hidden" id="livePanel">
+        <section
+          class="panel live-panel hidden"
+          id="livePanel"
+        >
           <div class="live-visual">
-            <div class="live-ring" id="liveRing"><div class="live-mic">🎙️</div></div>
-            <div class="live-status" id="liveStatus">جاهز للاتصال</div>
-            <p>تكلم بشكل طبيعي. الصوت يذهب مباشرة إلى Gemini ويعود الرد صوتيًا.</p>
+            <div
+              class="live-ring"
+              id="liveRing"
+            >
+              <div class="live-mic">🎙️</div>
+            </div>
+
+            <div
+              class="live-status"
+              id="liveStatus"
+            >
+              جاهز للاتصال
+            </div>
+
+            <p>
+              ميزة المكالمة المباشرة تحتاج إعداد WebSocket خاص.
+            </p>
           </div>
-          <div class="live-transcript" id="liveTranscript"></div>
+
+          <div
+            class="live-transcript"
+            id="liveTranscript"
+          ></div>
+
           <div class="live-controls">
-            <button class="live-call" id="liveCallBtn">🎙️ بدء المكالمة</button>
-            <button class="live-stop hidden" id="liveStopBtn">☎️ إنهاء المكالمة</button>
+            <button
+              type="button"
+              class="live-call"
+              id="liveCallBtn"
+            >
+              🎙️ بدء المكالمة
+            </button>
+
+            <button
+              type="button"
+              class="live-stop hidden"
+              id="liveStopBtn"
+            >
+              ☎️ إنهاء المكالمة
+            </button>
           </div>
-          <div class="live-note">🔒 المفتاح السري لا يُرسل للمتصفح؛ يستخدم الخادم رمزًا مؤقتًا للمكالمة.</div>
+
+          <div class="live-note">
+            المكالمة المباشرة غير مفعلة حاليًا.
+          </div>
         </section>
 
-        <div class="composer-wrap" id="composerWrap">
+        <div
+          class="composer-wrap"
+          id="composerWrap"
+        >
           <div class="composer-tools">
-            <button class="mini-btn" id="attachBtn" title="قريبًا">＋</button>
-            <button class="mini-btn" id="characterBtn">👤 شخصية</button>
-            <span class="typing-hint" id="typingHint">Enter للإرسال • Shift+Enter لسطر جديد</span>
+            <button
+              type="button"
+              class="mini-btn"
+              id="attachBtn"
+              title="قريبًا"
+            >
+              ＋
+            </button>
+
+            <button
+              type="button"
+              class="mini-btn"
+              id="characterBtn"
+            >
+              👤 شخصية
+            </button>
+
+            <span class="typing-hint">
+              Enter للإرسال • Shift+Enter لسطر جديد
+            </span>
           </div>
-          <form class="composer" id="composer">
-            <textarea id="chatInput" rows="1" placeholder="اكتب رسالتك هنا..."></textarea>
-            <button type="submit" class="send-btn" id="sendBtn">➤</button>
+
+          <form
+            class="composer"
+            id="composer"
+          >
+            <textarea
+              id="chatInput"
+              rows="1"
+              placeholder="اكتب رسالتك هنا..."
+            ></textarea>
+
+            <button
+              type="submit"
+              class="send-btn"
+              id="sendBtn"
+            >
+              ➤
+            </button>
           </form>
         </div>
+
       </section>
     </main>
   </div>
 
-  <div class="modal-backdrop hidden" id="characterModal">
+  <div
+    class="modal-backdrop hidden"
+    id="characterModal"
+  >
     <div class="modal-card">
-      <button class="modal-close" data-close="characterModal">×</button>
+      <button
+        type="button"
+        class="modal-close"
+        data-close="characterModal"
+      >
+        ×
+      </button>
+
       <div class="section-kicker">CHARACTER</div>
+
       <h2>اصنع شخصيتك</h2>
-      <p>سيتم استخدام الوصف داخل المحادثة الحالية فقط.</p>
-      <div class="field-group"><label>الاسم</label><input id="charName" placeholder="مثال: ليان" /></div>
-      <div class="field-group"><label>الشخصية</label><input id="charPersonality" placeholder="ودودة، ذكية، مرحة..." /></div>
-      <div class="field-group"><label>المظهر</label><input id="charAppearance" placeholder="اختياري" /></div>
-      <div class="field-group"><label>تعليمات إضافية</label><textarea id="charInstructions" placeholder="كيف تريدها أن تتصرف؟"></textarea></div>
-      <button class="primary-btn full" id="saveCharacterBtn">حفظ الشخصية</button>
+
+      <p>
+        احفظ وصف الشخصية لاستخدامه لاحقًا.
+      </p>
+
+      <div class="field-group">
+        <label for="charName">الاسم</label>
+        <input
+          id="charName"
+          placeholder="مثال: ليان"
+        >
+      </div>
+
+      <div class="field-group">
+        <label for="charPersonality">الشخصية</label>
+        <input
+          id="charPersonality"
+          placeholder="ودودة، ذكية، مرحة..."
+        >
+      </div>
+
+      <div class="field-group">
+        <label for="charAppearance">المظهر</label>
+        <input
+          id="charAppearance"
+          placeholder="اختياري"
+        >
+      </div>
+
+      <div class="field-group">
+        <label for="charInstructions">تعليمات إضافية</label>
+        <textarea
+          id="charInstructions"
+          placeholder="كيف تريدها أن تتصرف؟"
+        ></textarea>
+      </div>
+
+      <button
+        type="button"
+        class="primary-btn full"
+        id="saveCharacterBtn"
+      >
+        حفظ الشخصية
+      </button>
     </div>
   </div>
 
-  <div class="modal-backdrop hidden" id="settingsModal">
+  <div
+    class="modal-backdrop hidden"
+    id="settingsModal"
+  >
     <div class="modal-card wide">
-      <button class="modal-close" data-close="settingsModal">×</button>
+      <button
+        type="button"
+        class="modal-close"
+        data-close="settingsModal"
+      >
+        ×
+      </button>
+
       <div class="section-kicker">SETTINGS</div>
+
       <h2>الإعدادات</h2>
+
       <div class="settings-grid">
-        <div><strong>المحادثات</strong><p>تُحفظ محليًا في جهازك.</p></div>
-        <div><strong>النماذج</strong><p>Gemini يتم اكتشافها تلقائيًا من Models API.</p></div>
-        <div><strong>المكالمة اللايف</strong><p>تستخدم رمزًا مؤقتًا قصير العمر.</p></div>
-        <div><strong>الوسائط</strong><p>Pixazo يدعم المهام غير المتزامنة مع متابعة حالة المهمة.</p></div>
+        <div>
+          <strong>المحادثات</strong>
+          <p>تُحفظ محليًا في جهازك.</p>
+        </div>
+
+        <div>
+          <strong>النماذج</strong>
+          <p>يتم تحميل النماذج من الخادم.</p>
+        </div>
+
+        <div>
+          <strong>الصور</strong>
+          <p>تحتاج إلى ضبط مفتاح Gemini أو Pixazo.</p>
+        </div>
+
+        <div>
+          <strong>المكالمة اللايف</strong>
+          <p>غير مفعلة في هذه النسخة.</p>
+        </div>
       </div>
     </div>
   </div>
 
-  <div class="toast-wrap" id="toastWrap" aria-live="polite"></div>
+  <div
+    class="toast-wrap"
+    id="toastWrap"
+    aria-live="polite"
+  ></div>
 
-  <script src="/app.js" defer></script>
+  <script
+    src="/app.js"
+    defer
+  ></script>
 </body>
 </html>
