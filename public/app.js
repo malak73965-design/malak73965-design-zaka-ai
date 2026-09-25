@@ -286,7 +286,8 @@ function addMessageBubble(message, scroll = true) {
   $('#chatScroll')?.appendChild(row);
 
   if (scroll) {
-    $('#chatScroll').scrollTop = $('#chatScroll').scrollHeight;
+    const chatScroll = $('#chatScroll');
+    if (chatScroll) chatScroll.scrollTop = chatScroll.scrollHeight;
   }
 
   return bubble;
@@ -414,14 +415,15 @@ function providerChoices() {
 
 function setupSelectors() {
   const providerList = providerChoices();
+  const chatProvider = $('#chatProvider');
 
   fillSelect(
-    $('#chatProvider'),
+    chatProvider,
     providerList,
-    state.config?.defaults?.chatProvider || providerList[0]?.id
+    state.config?.defaults?.chatProvider || providerList[0]?.id || 'gemini'
   );
 
-  state.provider = $('#chatProvider').value || 'gemini';
+  state.provider = chatProvider?.value || state.config?.defaults?.chatProvider || providerList[0]?.id || 'gemini';
   updateChatModels();
 
   const imageProviders = [];
@@ -434,17 +436,21 @@ function setupSelectors() {
     imageProviders.push({ id: 'pixazo', label: '🪄 Pixazo' });
   }
 
+  const imageProvider = $('#imageProvider');
   fillSelect(
-    $('#imageProvider'),
+    imageProvider,
     imageProviders,
-    state.config?.defaults?.imageProvider || imageProviders[0]?.id
+    state.config?.defaults?.imageProvider || imageProviders[0]?.id || 'gemini'
   );
 
-  state.imageProvider = $('#imageProvider').value || 'gemini';
+  state.imageProvider = imageProvider?.value || state.config?.defaults?.imageProvider || imageProviders[0]?.id || 'gemini';
   updateImageModels();
 }
 
 function updateChatModels() {
+  const chatModel = $('#chatModel');
+  if (!chatModel) return;
+
   const models =
     state.provider === 'openai'
       ? state.config?.models?.openai || []
@@ -452,28 +458,34 @@ function updateChatModels() {
 
   const desired = state.model || state.config?.defaults?.chatModel;
 
-  fillSelect($('#chatModel'), models, desired);
-  state.model = $('#chatModel').value || '';
+  fillSelect(chatModel, models, desired);
+  state.model = chatModel.value || '';
 }
 
 function updateImageModels() {
+  const imageModel = $('#imageModel');
+  if (!imageModel) return;
+
   const models =
     state.imageProvider === 'pixazo'
       ? state.config?.models?.pixazoImage || []
       : state.config?.models?.geminiImage || [];
 
   fillSelect(
-    $('#imageModel'),
+    imageModel,
     models.map((id) => ({ id, label: imageLabel(id) })),
     state.imageModel
   );
 
-  state.imageModel = $('#imageModel').value || '';
+  state.imageModel = imageModel.value || '';
 
   const isGemini = state.imageProvider === 'gemini';
 
-  $('#imageSize').disabled = !isGemini;
-  $('#imageAspect').disabled = false;
+  const imageSize = $('#imageSize');
+  if (imageSize) imageSize.disabled = !isGemini;
+
+  const imageAspect = $('#imageAspect');
+  if (imageAspect) imageAspect.disabled = false;
 }
 
 function imageLabel(id) {
@@ -528,7 +540,8 @@ function addTypingBubble() {
   row.append(avatar, wrap);
 
   $('#chatScroll')?.appendChild(row);
-  $('#chatScroll').scrollTop = $('#chatScroll').scrollHeight;
+  const chatScroll = $('#chatScroll');
+  if (chatScroll) chatScroll.scrollTop = chatScroll.scrollHeight;
 
   return row;
 }
@@ -898,10 +911,15 @@ async function refreshModels() {
 
 function loadCharacterForm() {
   const character = state.character || {};
-  $('#charName').value = character.name || '';
-  $('#charPersonality').value = character.personality || '';
-  $('#charAppearance').value = character.appearance || '';
-  $('#charInstructions').value = character.instructions || '';
+  const charName = $('#charName');
+  const charPersonality = $('#charPersonality');
+  const charAppearance = $('#charAppearance');
+  const charInstructions = $('#charInstructions');
+
+  if (charName) charName.value = character.name || '';
+  if (charPersonality) charPersonality.value = character.personality || '';
+  if (charAppearance) charAppearance.value = character.appearance || '';
+  if (charInstructions) charInstructions.value = character.instructions || '';
 }
 
 function saveCharacter() {
