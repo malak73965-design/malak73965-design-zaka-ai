@@ -46,10 +46,12 @@ function escapeHtml(text) {
 function toast(message, kind = '') {
   const wrap = $('#toastWrap');
   if (!wrap) return;
+
   const el = document.createElement('div');
   el.className = `toast ${kind}`;
   el.textContent = message;
   wrap.appendChild(el);
+
   setTimeout(() => el.remove(), 3400);
 }
 
@@ -67,21 +69,13 @@ function setBusy(button, busy, text = 'جاري التنفيذ...') {
 }
 
 function saveChats() {
-  localStorage.setItem(
-    STORAGE.chats,
-    JSON.stringify(state.chats)
-  );
+  localStorage.setItem(STORAGE.chats, JSON.stringify(state.chats));
 }
 
 function loadLocal() {
   try {
-    state.chats = JSON.parse(
-      localStorage.getItem(STORAGE.chats) || '[]'
-    );
-
-    state.character = JSON.parse(
-      localStorage.getItem(STORAGE.character) || 'null'
-    );
+    state.chats = JSON.parse(localStorage.getItem(STORAGE.chats) || '[]');
+    state.character = JSON.parse(localStorage.getItem(STORAGE.character) || 'null');
 
     const theme = localStorage.getItem(STORAGE.theme);
     document.body.classList.toggle('light', theme === 'light');
@@ -143,23 +137,26 @@ function renderHistory() {
 
 function selectChat(id) {
   state.currentChatId = id;
+
   const chat = currentChat();
   state.messages = chat ? chat.messages : [];
+
   renderHistory();
   renderMessages();
 
-  $('#menuBtn')
-    ?.closest('.sidebar')
-    ?.classList.remove('open');
+  $('#menuBtn')?.closest('.sidebar')?.classList.remove('open');
 }
 
 function newChat() {
   stopLiveCall(false);
+
   state.currentChatId = null;
   state.messages = [];
+
   ensureChat();
   renderHistory();
   renderMessages();
+
   $('#chatInput')?.focus();
 }
 
@@ -169,6 +166,7 @@ function updateCurrentChat() {
   chat.updatedAt = Date.now();
 
   const firstUser = state.messages.find((m) => m.role === 'user');
+
   if (firstUser && (!chat.title || chat.title === 'محادثة جديدة')) {
     chat.title = String(firstUser.content).slice(0, 38);
   }
@@ -196,9 +194,11 @@ function renderMessages() {
   }
 
   box.innerHTML = '';
+
   for (const message of state.messages) {
     addMessageBubble(message, false);
   }
+
   box.scrollTop = box.scrollHeight;
 }
 
@@ -230,14 +230,37 @@ function addMessageBubble(message, scroll = true) {
     copy.textContent = '📋 نسخ';
 
     copy.onclick = async () => {
+      const value = message.content || '';
+
       try {
-        await navigator.clipboard.writeText(message.content || '');
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(value);
+        } else {
+          const textarea = document.createElement('textarea');
+          textarea.value = value;
+          textarea.style.position = 'fixed';
+          textarea.style.opacity = '0';
+          document.body.appendChild(textarea);
+          textarea.focus();
+          textarea.select();
+
+          const copied = document.execCommand('copy');
+          textarea.remove();
+
+          if (!copied) {
+            throw new Error('تعذر النسخ');
+          }
+        }
+
         copy.textContent = '✅ تم النسخ';
-        setTimeout(() => (copy.textContent = '📋 نسخ'), 1200);
+        setTimeout(() => {
+          copy.textContent = '📋 نسخ';
+        }, 1200);
       } catch {
-        toast('تعذر النسخ.', 'error');
+        toast('تعذر النسخ، جرّب النسخ يدويًا.', 'error');
       }
     };
+
     actions.appendChild(copy);
 
     if (state.config?.providers?.elevenlabs) {
@@ -289,11 +312,13 @@ async function speakText(text, button) {
       try {
         message = JSON.parse(new TextDecoder().decode(data)).error || message;
       } catch {}
+
       throw new Error(message);
     }
 
     const url = URL.createObjectURL(new Blob([data], { type: 'audio/mpeg' }));
     const audio = new Audio(url);
+
     await audio.play();
     audio.onended = () => URL.revokeObjectURL(url);
   } catch (error) {
@@ -349,7 +374,6 @@ function setMode(mode) {
 
 function fillSelect(select, items, current = '') {
   if (!select) return;
-
   select.innerHTML = '';
 
   if (!items.length) {
@@ -549,6 +573,7 @@ async function sendMessage() {
       body: JSON.stringify({
         provider: state.provider,
         model: state.model,
+        message,
         messages: state.messages.map((item) => ({
           role: item.role,
           content: item.content
@@ -576,6 +601,7 @@ async function sendMessage() {
     };
 
     state.messages.push(aiMessage);
+
     typing.remove();
     addMessageBubble(aiMessage, true);
     updateCurrentChat();
@@ -607,13 +633,15 @@ async function generateImage(event) {
   setBusy(button, true, 'جاري توليد الصورة...');
 
   const result = $('#imageResult');
-
   if (result) {
     result.innerHTML = '<div class="image-loading">⏳ جاري إنشاء الصورة...</div>';
   }
 
   try {
-    const endpoint = state.imageProvider === 'pixazo' ? '/api/image' : '/api/gemini-image';
+    const endpoint =
+      state.imageProvider === 'pixazo'
+        ? '/api/image'
+        : '/api/gemini-image';
 
     const body = {
       prompt,
@@ -655,7 +683,12 @@ async function generateImage(event) {
 function showGeneratedImage(url, prompt = '') {
   const result = $('#imageResult');
   if (!result || !url) return;
-  renderImageResult(result, url, state.imageProvider === 'pixazo' ? 'pixazo' : (state.imageModel || 'gemini'));
+
+  renderImageResult(
+    result,
+    url,
+    state.imageProvider === 'pixazo' ? 'pixazo' : (state.imageModel || 'gemini')
+  );
 }
 
 function renderImageResult(result, url, model) {
@@ -809,7 +842,7 @@ async function checkHealth() {
 
     updateConnectionStatus(true, 'الاتصال سليم');
     return data;
-  } catch (error) {
+  } catch {
     updateConnectionStatus(false, 'تحقق من الخادم');
     return null;
   }
@@ -945,7 +978,6 @@ function initEvents() {
   });
 
   $('#refreshModelsBtn')?.addEventListener('click', refreshModels);
-
   $('#imageForm')?.addEventListener('submit', generateImage);
 
   $$('.mode-tab').forEach((button) => {
@@ -957,8 +989,10 @@ function initEvents() {
   $$('.quick-chip').forEach((button) => {
     button.addEventListener('click', () => {
       setMode('chat');
+
       const input = $('#chatInput');
       if (!input) return;
+
       input.value = button.dataset.quick || '';
       input.focus();
       resizeChatInput();
