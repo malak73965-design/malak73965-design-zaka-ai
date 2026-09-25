@@ -1411,7 +1411,7 @@ function initEvents() {
     'submit',
     (event) => {
       event.preventDefault();
-      submitChat();
+sendMessage();
     }
   );
 
@@ -1564,13 +1564,12 @@ function initEvents() {
   );
 
   $('#characterBtn')?.addEventListener(
-    'click',
-    () => {
-      loadCharacterForm();
-      $('#characterModal')
-        ?.classList.remove('hidden');
-    }
-  );
+  'click',
+  () => {
+    $('#characterModal')
+      ?.classList.remove('hidden');
+  }
+);
 
   $('#saveCharacterBtn')
     ?.addEventListener(
