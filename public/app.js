@@ -1473,10 +1473,10 @@ sendMessage();
     }
   );
 
-  $('#refreshModelsBtn')?.addEventListener(
-    'click',
-    refreshModels
-  );
+$('#refreshModelsBtn')?.addEventListener(
+  'click',
+  () => loadConfig()
+);
 
   $('#imageForm')?.addEventListener(
     'submit',
@@ -1572,10 +1572,25 @@ sendMessage();
 );
 
   $('#saveCharacterBtn')
-    ?.addEventListener(
-      'click',
-      saveCharacter
-    );
+  ?.addEventListener(
+    'click',
+    () => {
+      const character = {
+        name: $('#characterName')?.value?.trim() || '',
+        prompt: $('#characterPrompt')?.value?.trim() || ''
+      };
+
+      state.character = character;
+
+      localStorage.setItem(
+        STORAGE.character,
+        JSON.stringify(character)
+      );
+
+      $('#characterModal')?.classList.add('hidden');
+      toast('تم حفظ الشخصية.');
+    }
+  );
 
   $('#liveCallBtn')?.addEventListener(
     'click',
