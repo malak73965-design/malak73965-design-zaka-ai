@@ -1017,7 +1017,7 @@ async function generateImage(event) {
     data.jobId,
     prompt
   );
-}
+
     } else {
       throw new Error(
         'لم يتم استلام صورة من الخادم.'
