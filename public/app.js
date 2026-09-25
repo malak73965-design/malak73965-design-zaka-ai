@@ -849,12 +849,17 @@ async function sendMessage() {
             'application/json'
         },
         body: JSON.stringify({
-          message,
-          model:
-            state.model
-        })
-      }
-    );
+  provider: state.provider,
+  model: state.model,
+  messages: [
+    ...state.messages.map((item) => ({
+      role: item.role,
+      content: item.content
+    }))
+  ]
+})
+  messages: state.messages
+})
 
     const data =
       await response.json();
@@ -1404,8 +1409,32 @@ function toggleTheme() {
   }
 }
 
+function initEvents() {
+  
+function startLiveCall() {
+  toast('ميزة المكالمة المباشرة غير مفعلة حاليًا.', 'error');
+}
 
+function stopLiveCall(showMessage = false) {
+  state.live.active = false;
+  state.live.connecting = false;
 
+  if (state.live.socket) {
+    state.live.socket.close();
+    state.live.socket = null;
+  }
+
+  $('#liveCallBtn')?.classList.remove('hidden');
+  $('#liveStopBtn')?.classList.add('hidden');
+
+  if ($('#liveStatus')) {
+    $('#liveStatus').textContent = 'جاهز للاتصال';
+  }
+
+  if (showMessage) {
+    toast('تم إنهاء المكالمة.', 'success');
+  }
+}
 function initEvents() {
   $('#composer')?.addEventListener(
     'submit',
