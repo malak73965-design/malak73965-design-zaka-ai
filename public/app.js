@@ -1003,19 +1003,21 @@ async function generateImage(event) {
     }
 
     if (
-      data?.imageUrl
-    ) {
-      showGeneratedImage(
-        data.imageUrl,
-        prompt
-      );
-    } else if (
-      data?.jobId
-    ) {
-      await pollImageJob(
-        data.jobId,
-        prompt
-      );
+  data?.imageUrl
+) {
+  renderImageResult(
+    $('#imageResult'),
+    data.imageUrl,
+    state.imageModel || 'gemini'
+  );
+} else if (
+  data?.jobId
+) {
+  await pollImageJob(
+    data.jobId,
+    prompt
+  );
+}
     } else {
       throw new Error(
         'لم يتم استلام صورة من الخادم.'
