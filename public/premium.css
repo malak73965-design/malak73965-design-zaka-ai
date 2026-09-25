@@ -1,160 +1,196 @@
-/* Premium UI layer for Zaka AI */
+/* عصر AI — final visual polish layer.
+   This file only styles existing UI hooks; it intentionally contains no behavior. */
+
 :root {
-  --premium-radius: 20px;
-  --premium-border: rgba(255, 255, 255, .12);
+  --focus-ring: 0 0 0 4px rgba(124, 124, 255, 0.16);
 }
 
-body {
-  background:
-    radial-gradient(circle at 8% 8%, rgba(124, 92, 255, .18), transparent 28%),
-    radial-gradient(circle at 92% 12%, rgba(25, 201, 255, .12), transparent 24%),
-    var(--bg);
-  letter-spacing: -.01em;
-}
-
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  opacity: .22;
-  background-image: linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
-  background-size: 34px 34px;
-  mask-image: linear-gradient(to bottom, black, transparent 85%);
-}
-
-.app-shell { position: relative; }
-.sidebar {
-  border-left-color: var(--premium-border);
-  background: linear-gradient(180deg, rgba(12, 18, 32, .92), rgba(7, 11, 20, .8));
-  box-shadow: 18px 0 60px rgba(0, 0, 0, .14);
-}
-
-.brand-mark, .new-chat-btn, .send-btn, .primary-btn {
-  box-shadow: 0 12px 30px rgba(92, 82, 255, .28);
-}
-
-.brand-mark { position: relative; isolation: isolate; }
-.brand-mark::after {
-  content: '';
-  position: absolute;
-  inset: -5px;
-  border-radius: inherit;
-  border: 1px solid rgba(124, 92, 255, .35);
-  animation: premiumPulse 3s ease-in-out infinite;
-}
-
-.topbar {
-  background: rgba(7, 11, 20, .68);
-  border-bottom-color: var(--premium-border);
-}
-
-.workspace { position: relative; z-index: 1; }
-.hero-card {
-  min-height: 168px;
-  border-color: rgba(150, 139, 255, .22);
-  background:
-    linear-gradient(135deg, rgba(124, 92, 255, .2), rgba(25, 201, 255, .06) 55%, rgba(12, 18, 32, .85)),
-    var(--panel);
-  box-shadow: 0 24px 70px rgba(0, 0, 0, .24), inset 0 1px rgba(255,255,255,.08);
-}
-.hero-copy h1 { letter-spacing: -.045em; }
-.hero-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-inline-start: auto; }
-.quick-chip, .mode-tab, .ghost-btn, .icon-btn, .mini-btn, .secondary-btn {
-  transition: transform .2s ease, background .2s ease, border-color .2s ease, box-shadow .2s ease;
-}
-.quick-chip:hover, .mode-tab:hover, .ghost-btn:hover, .icon-btn:hover, .mini-btn:hover, .secondary-btn:hover {
-  transform: translateY(-2px);
-  border-color: rgba(124, 92, 255, .5);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, .16);
-}
-
-.mode-tabs {
-  padding: 5px;
-  width: fit-content;
-  border: 1px solid var(--premium-border);
-  border-radius: 16px;
-  background: rgba(12, 18, 32, .58);
-}
-.mode-tab { border-color: transparent; }
-.mode-tab.active {
-  background: linear-gradient(135deg, rgba(124,92,255,.28), rgba(25,201,255,.14));
-  border-color: rgba(124, 92, 255, .4);
-  color: var(--text);
-  box-shadow: 0 8px 24px rgba(75, 65, 200, .2);
-}
-
-.panel {
-  border-color: var(--premium-border);
-  box-shadow: 0 25px 80px rgba(0, 0, 0, .24), inset 0 1px rgba(255,255,255,.035);
-}
-.provider-bar, .provider-grid { background: rgba(255,255,255,.018); }
-select, input, textarea {
-  border-color: rgba(255, 255, 255, .11) !important;
-  transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
-}
-select:focus, input:focus, textarea:focus {
+/* Native-feeling focus and press states */
+:where(button, a, input, textarea, select):focus-visible {
   outline: none;
-  border-color: rgba(124, 92, 255, .72) !important;
-  box-shadow: 0 0 0 4px rgba(124, 92, 255, .12);
+  box-shadow: var(--focus-ring);
 }
 
-.chat-scroll { scrollbar-gutter: stable; }
-.message { animation: premiumIn .25s ease both; }
-.bubble {
-  border-color: rgba(255,255,255,.1);
-  box-shadow: 0 10px 28px rgba(0,0,0,.12);
+:where(button, .quick-chip, .mode-tab, .history-item, .side-action, .msg-action, .mini-btn, .ghost-btn, .icon-btn, .round-btn, .secondary-btn):active {
+  transform: scale(0.98);
 }
+
+:where(button, .quick-chip, .mode-tab, .history-item, .side-action, .msg-action, .mini-btn, .ghost-btn, .icon-btn, .round-btn, .secondary-btn):disabled {
+  cursor: default;
+  opacity: 0.55;
+  transform: none;
+}
+
+/* Keep the message stream visually open while retaining existing markup. */
+.message.ai .msg-wrap {
+  max-width: min(88%, 740px);
+}
+
 .message.ai .bubble {
-  background: linear-gradient(135deg, rgba(124,92,255,.12), rgba(255,255,255,.035));
+  border-color: transparent;
+  box-shadow: none;
+  padding-inline: 0;
+  background: transparent;
 }
 
+.message.ai .avatar {
+  margin-bottom: 3px;
+}
+
+.message.user .msg-wrap {
+  max-width: min(84%, 620px);
+}
+
+.message.user .bubble {
+  border-radius: 20px 20px 6px 20px;
+}
+
+.message.ai .msg-actions {
+  margin-top: 10px;
+}
+
+.msg-action {
+  min-height: 36px;
+  padding-inline: 10px;
+}
+
+/* Long text, markdown-like content and technical output remain contained. */
+.bubble pre,
+.bubble code {
+  direction: ltr;
+  text-align: left;
+  unicode-bidi: plaintext;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.bubble pre {
+  max-width: 100%;
+  overflow-x: auto;
+  margin: 12px 0 2px;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: rgba(0, 0, 0, 0.24);
+  -webkit-overflow-scrolling: touch;
+}
+
+.bubble img,
+.image-result img,
+.video-result video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* A compact iPhone composer: the input is the visual priority. */
 .composer-wrap {
-  padding: 12px;
-  border: 1px solid var(--premium-border);
-  border-radius: var(--premium-radius);
-  background: rgba(12, 18, 32, .72);
-  box-shadow: 0 18px 50px rgba(0,0,0,.18);
-}
-.composer { border-color: rgba(255,255,255,.14); }
-.send-btn { transition: transform .2s ease, filter .2s ease; }
-.send-btn:hover { transform: scale(1.06); filter: brightness(1.1); }
-
-.result-box:empty { display: none; }
-.image-result { animation: premiumIn .3s ease both; }
-.modal-card {
-  border-color: var(--premium-border);
-  box-shadow: 0 30px 100px rgba(0,0,0,.48), inset 0 1px rgba(255,255,255,.08);
-}
-.toast { box-shadow: 0 14px 35px rgba(0,0,0,.28); }
-
-@keyframes premiumIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-@keyframes premiumPulse {
-  0%, 100% { opacity: .35; transform: scale(1); }
-  50% { opacity: .9; transform: scale(1.08); }
+  margin-inline: -2px;
 }
 
+.composer:focus-within {
+  border-color: rgba(124, 124, 255, 0.46);
+  box-shadow: var(--focus-ring), var(--shadow-soft);
+}
+
+.composer textarea:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.send-btn {
+  opacity: 0.48;
+  filter: saturate(0.7);
+}
+
+.composer:has(textarea:not(:placeholder-shown)) .send-btn {
+  opacity: 1;
+  filter: none;
+}
+
+@supports not selector(:has(*)) {
+  .send-btn {
+    opacity: 1;
+    filter: none;
+  }
+}
+
+/* Drawer scrim is created without changing the existing DOM or JavaScript. */
 @media (max-width: 900px) {
-  .hero-card { align-items: flex-start; flex-wrap: wrap; }
-  .hero-chips { width: 100%; margin-inline-start: 0; }
-  .mode-tabs { width: 100%; }
-  .mode-tab { flex: 1; }
+  .sidebar::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background: rgba(3, 8, 14, 0.48);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+
+  .sidebar.open::after {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .top-status {
+    font-size: 11px;
+  }
 }
 
-@media (max-width: 640px) {
-  .workspace { padding: 14px 12px 24px; }
-  .topbar { padding: 0 14px; }
-  .hero-card { min-height: 0; }
-  .hero-copy h1 { font-size: 24px; }
-  .hero-chips { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 2px; }
-  .quick-chip { flex: 0 0 auto; }
-  .composer-wrap { padding: 9px; }
+@media (max-width: 620px) {
+  .hero-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+  }
+
+  .quick-chip {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .hero-actions .quick-chip:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .message.ai .msg-wrap,
+  .message.user .msg-wrap {
+    max-width: 90%;
+  }
+
+  .message.ai .bubble {
+    font-size: 15px;
+  }
+
+  .composer-wrap {
+    margin-inline: 0;
+  }
+
+  .typing-hint {
+    display: none;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 520px) {
+  .hero-card {
+    padding-block: 12px;
+  }
+
+  .hero-copy p,
+  .hero-actions {
+    display: none;
+  }
+
+  .chat-panel {
+    max-height: 60vh;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+  .sidebar,
+  .sidebar::after,
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
