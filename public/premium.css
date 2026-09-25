@@ -1,27 +1,148 @@
-/* عصر AI — final visual polish layer.
-   This file only styles existing UI hooks; it intentionally contains no behavior. */
+/* عصر AI — interactive motion layer.
+   Visual-only enhancement: no API, state, or application logic changes. */
 
 :root {
   --focus-ring: 0 0 0 4px rgba(124, 124, 255, 0.16);
+  --motion-fast: 160ms;
+  --motion-base: 240ms;
+  --motion-slow: 520ms;
 }
 
-/* Native-feeling focus and press states */
 :where(button, a, input, textarea, select):focus-visible {
   outline: none;
   box-shadow: var(--focus-ring);
 }
 
-:where(button, .quick-chip, .mode-tab, .history-item, .side-action, .msg-action, .mini-btn, .ghost-btn, .icon-btn, .round-btn, .secondary-btn):active {
-  transform: scale(0.98);
+:where(button, .quick-chip, .mode-tab, .history-item, .side-action, .msg-action, .mini-btn, .ghost-btn, .icon-btn, .round-btn, .secondary-btn, .primary-btn):active {
+  transform: scale(.97);
 }
 
-:where(button, .quick-chip, .mode-tab, .history-item, .side-action, .msg-action, .mini-btn, .ghost-btn, .icon-btn, .round-btn, .secondary-btn):disabled {
+:where(button, .quick-chip, .mode-tab, .history-item, .side-action, .msg-action, .mini-btn, .ghost-btn, .icon-btn, .round-btn, .secondary-btn, .primary-btn):disabled {
   cursor: default;
-  opacity: 0.55;
+  opacity: .55;
   transform: none;
 }
 
-/* Keep the message stream visually open while retaining existing markup. */
+/* A restrained AI atmosphere. Pseudo-elements keep the DOM and JS untouched. */
+.hero-card::before,
+.hero-card::after {
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+.hero-card::before {
+  content: "";
+  position: absolute;
+  inset: 14% auto auto 7%;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent-2);
+  opacity: .48;
+  box-shadow:
+    42px 26px 0 1px rgba(154,139,255,.45),
+    118px -8px 0 -1px rgba(46,212,255,.32),
+    188px 44px 0 -2px rgba(255,255,255,.25);
+  animation: ambientDrift 8s ease-in-out infinite alternate;
+}
+
+.hero-card::after {
+  animation: ambientGlow 7s ease-in-out infinite alternate;
+}
+
+.hero-orb {
+  animation: orbIdle 4.8s ease-in-out infinite;
+  will-change: transform, filter;
+}
+
+.hero-copy,
+.hero-actions,
+.mode-tabs,
+.chat-panel,
+.composer-wrap {
+  animation: enterUp var(--motion-slow) both;
+}
+
+.hero-copy { animation-delay: 50ms; }
+.hero-actions { animation-delay: 120ms; }
+.mode-tabs { animation-delay: 170ms; }
+.chat-panel { animation-delay: 220ms; }
+.composer-wrap { animation-delay: 270ms; }
+
+.quick-chip,
+.mode-tab,
+.mini-btn,
+.icon-btn,
+.ghost-btn,
+.round-btn,
+.secondary-btn,
+.primary-btn,
+.msg-action,
+.side-action,
+.history-item {
+  transition: transform var(--motion-fast) ease, background var(--motion-base) ease,
+    border-color var(--motion-base) ease, box-shadow var(--motion-base) ease,
+    opacity var(--motion-base) ease;
+}
+
+.quick-chip:hover,
+.mode-tab:hover,
+.mini-btn:hover,
+.icon-btn:hover,
+.ghost-btn:hover,
+.round-btn:hover,
+.secondary-btn:hover,
+.primary-btn:hover,
+.msg-action:hover,
+.side-action:hover,
+.history-item:hover {
+  border-color: rgba(124,124,255,.36);
+  box-shadow: 0 8px 24px rgba(0,0,0,.12);
+}
+
+.composer {
+  transition: border-color var(--motion-base) ease, box-shadow var(--motion-base) ease,
+    transform var(--motion-base) ease;
+}
+
+.composer:focus-within {
+  border-color: rgba(124,124,255,.52);
+  box-shadow: var(--focus-ring), var(--shadow-soft);
+  transform: translateY(-1px);
+}
+
+.composer textarea:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.send-btn {
+  opacity: .5;
+  filter: saturate(.7);
+  transition: transform var(--motion-fast) ease, opacity var(--motion-base) ease,
+    filter var(--motion-base) ease, box-shadow var(--motion-base) ease;
+}
+
+.composer:has(textarea:not(:placeholder-shown)) .send-btn {
+  opacity: 1;
+  filter: none;
+  box-shadow: 0 0 0 0 rgba(124,124,255,0), 0 14px 26px rgba(124,124,255,.28);
+  animation: sendReady 1.8s ease-in-out infinite;
+}
+
+@supports not selector(:has(*)) {
+  .send-btn { opacity: 1; filter: none; }
+}
+
+/* Message arrival and a subtle thinking language for the existing typing row. */
+.message {
+  will-change: transform, opacity;
+}
+
+.message:not(.typing-message) {
+  animation: messageIn 260ms cubic-bezier(.2,.8,.2,1) both;
+}
+
 .message.ai .msg-wrap {
   max-width: min(88%, 740px);
 }
@@ -35,6 +156,7 @@
 
 .message.ai .avatar {
   margin-bottom: 3px;
+  animation: orbIdle 4.8s ease-in-out infinite;
 }
 
 .message.user .msg-wrap {
@@ -54,7 +176,25 @@
   padding-inline: 10px;
 }
 
-/* Long text, markdown-like content and technical output remain contained. */
+.typing-message .bubble {
+  position: relative;
+  min-width: 96px;
+  padding-inline: 14px;
+}
+
+.typing-message .bubble::after {
+  content: "عصر AI يفكر";
+  margin-inline-start: 5px;
+  color: var(--muted);
+  font-size: 11px;
+  animation: thinkingLabel 1.8s ease-in-out infinite;
+}
+
+.typing-bubble span {
+  animation: thinkingDot 1.15s ease-in-out infinite;
+}
+
+/* Keep code and media contained without changing their content. */
 .bubble pre,
 .bubble code {
   direction: ltr;
@@ -70,7 +210,7 @@
   padding: 14px;
   border-radius: 14px;
   border: 1px solid var(--line);
-  background: rgba(0, 0, 0, 0.24);
+  background: rgba(0,0,0,.24);
   -webkit-overflow-scrolling: touch;
 }
 
@@ -81,58 +221,30 @@
   height: auto;
 }
 
-/* A compact iPhone composer: the input is the visual priority. */
-.composer-wrap {
-  margin-inline: -2px;
+.image-result {
+  animation: mediaIn 360ms cubic-bezier(.2,.8,.2,1) both;
 }
 
-.composer:focus-within {
-  border-color: rgba(124, 124, 255, 0.46);
-  box-shadow: var(--focus-ring), var(--shadow-soft);
-}
-
-.composer textarea:focus {
-  outline: none;
-  box-shadow: none;
-}
-
-.send-btn {
-  opacity: 0.48;
-  filter: saturate(0.7);
-}
-
-.composer:has(textarea:not(:placeholder-shown)) .send-btn {
-  opacity: 1;
-  filter: none;
-}
-
-@supports not selector(:has(*)) {
-  .send-btn {
-    opacity: 1;
-    filter: none;
-  }
-}
-
-/* Drawer scrim is created without changing the existing DOM or JavaScript. */
+/* Mobile drawer motion and dimmed backdrop, without adding a new element. */
 @media (max-width: 900px) {
+  .sidebar {
+    will-change: transform;
+  }
+
   .sidebar::after {
     content: "";
     position: fixed;
     inset: 0;
     z-index: -1;
-    background: rgba(3, 8, 14, 0.48);
+    background: rgba(3,8,14,.48);
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.25s ease;
+    transition: opacity 250ms ease;
   }
 
   .sidebar.open::after {
     opacity: 1;
     pointer-events: auto;
-  }
-
-  .top-status {
-    font-size: 11px;
   }
 }
 
@@ -162,35 +274,68 @@
     font-size: 15px;
   }
 
-  .composer-wrap {
-    margin-inline: 0;
-  }
-
   .typing-hint {
     display: none;
   }
 }
 
 @media (orientation: landscape) and (max-height: 520px) {
-  .hero-card {
-    padding-block: 12px;
-  }
-
+  .hero-card { padding-block: 12px; }
   .hero-copy p,
-  .hero-actions {
-    display: none;
-  }
+  .hero-actions { display: none; }
+  .chat-panel { max-height: 60vh; }
+}
 
-  .chat-panel {
-    max-height: 60vh;
-  }
+@keyframes enterUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes messageIn {
+  from { opacity: 0; transform: translateY(12px) scale(.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes mediaIn {
+  from { opacity: 0; transform: scale(.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes orbIdle {
+  0%, 100% { transform: translateY(0) scale(1); filter: brightness(1); }
+  50% { transform: translateY(-3px) scale(1.025); filter: brightness(1.08); }
+}
+
+@keyframes ambientDrift {
+  from { transform: translate3d(0, 2px, 0) scale(.92); opacity: .28; }
+  to { transform: translate3d(12px, -8px, 0) scale(1.06); opacity: .6; }
+}
+
+@keyframes ambientGlow {
+  from { opacity: .5; transform: scale(.96); }
+  to { opacity: .9; transform: scale(1.04); }
+}
+
+@keyframes sendReady {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.035); }
+}
+
+@keyframes thinkingDot {
+  0%, 80%, 100% { transform: scale(.72); opacity: .35; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes thinkingLabel {
+  0%, 100% { opacity: .48; }
+  50% { opacity: 1; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .sidebar,
-  .sidebar::after,
-  * {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
   }
 }
