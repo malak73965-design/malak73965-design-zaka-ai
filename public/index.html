@@ -3,96 +3,316 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#0b0b0f">
-  <meta name="description" content="عصر AI — مساعدك الذكي">
+  <meta name="theme-color" content="#0b1020">
+  <meta name="description" content="عصر AI — تطبيق ذكي حديث">
   <meta name="color-scheme" content="dark light">
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
-  <link rel="stylesheet" href="/premium.css">
   <title>عصر AI</title>
 </head>
 <body>
   <div class="app-shell">
-    <aside class="sidebar" id="sidebar" aria-label="القائمة الرئيسية">
-      <div class="sidebar-head">
-        <div class="brand-mark" aria-hidden="true">✦</div>
-        <div><strong>عصر AI</strong><small>مساعدك الذكي</small></div>
-        <button class="icon-btn sidebar-close" id="sidebarClose" aria-label="إغلاق القائمة">×</button>
+    <aside class="sidebar" id="sidebar" aria-label="لوحة التنقل الرئيسية">
+      <div class="sidebar-header">
+        <div class="brand-block">
+          <div class="brand-mark" aria-hidden="true">✦</div>
+          <div class="brand-copy">
+            <strong>عصر AI</strong>
+            <small>ذكي ومريح</small>
+          </div>
+        </div>
+        <button class="icon-btn mobile-only" id="sidebarClose" aria-label="إغلاق القائمة">×</button>
       </div>
-      <button class="new-chat-btn" id="newChatBtn"><span>＋</span> محادثة جديدة</button>
-      <button class="search-row" id="searchBtn"><span>⌕</span><span>بحث في المحادثات</span><kbd>⌘ K</kbd></button>
-      <div class="side-label">المحادثات</div>
-      <div class="history" id="history"></div>
-      <div class="sidebar-foot">
-        <button class="side-action" id="characterBtn"><span>✦</span> شخصية المساعد</button>
-        <button class="side-action" id="settingsBtn"><span>⚙</span> الإعدادات</button>
-        <div class="connection-pill" id="connectionPill" role="status"><i class="status-dot"></i><span>جاري الفحص...</span></div>
+
+      <button class="primary-btn full" id="newChatBtn" type="button">
+        <span>＋</span>
+        <span>محادثة جديدة</span>
+      </button>
+
+      <label class="search-box" aria-label="بحث في المحادثات">
+        <span>⌕</span>
+        <input id="historySearch" type="search" placeholder="بحث في التاريخ..." autocomplete="off">
+      </label>
+
+      <div class="section-label">المحادثات</div>
+      <div class="history-list" id="history" aria-live="polite"></div>
+
+      <div class="sidebar-footer">
+        <button class="nav-action" id="characterBtn" type="button">
+          <span aria-hidden="true">✦</span>
+          <span>شخصية المساعد</span>
+        </button>
+        <button class="nav-action" id="settingsBtn" type="button">
+          <span aria-hidden="true">⚙</span>
+          <span>الإعدادات</span>
+        </button>
+        <div class="connection-pill" id="connectionPill" role="status" aria-live="polite">
+          <i class="status-dot"></i>
+          <span>جاري الفحص...</span>
+        </div>
       </div>
     </aside>
 
-    <main class="main">
+    <main class="main-panel">
       <header class="topbar">
-        <button class="icon-btn mobile-only" id="menuBtn" aria-label="فتح القائمة">☰</button>
-        <div class="conversation-title"><span class="brand-dot">✦</span><div><strong>عصر AI</strong><small id="conversationStatus">مساعد ذكي</small></div></div>
-        <div class="top-actions">
-          <span class="online-status"><i class="status-dot ok"></i> متصل</span>
-          <button class="icon-btn" id="clearBtn" aria-label="مسح المحادثة" title="مسح المحادثة">⌫</button>
-        </div>
-      </header>
-
-      <section class="workspace">
-        <div class="chat-panel" id="chatPanel" aria-label="المحادثة">
-          <div class="model-bar">
-            <label>الموديل<select id="chatModel"></select></label>
-            <label>المزود<select id="chatProvider"></select></label>
-            <button class="icon-btn" id="refreshModelsBtn" title="تحديث الموديلات" aria-label="تحديث الموديلات">↻</button>
-          </div>
-          <div class="chat-scroll" id="chatScroll">
-            <div class="welcome" id="emptyState">
-              <div class="ai-orb"><span>✦</span></div>
-              <p class="welcome-eyebrow">مرحبًا بك في عصر AI</p>
-              <h1>كيف أساعدك اليوم؟</h1>
-              <p class="welcome-copy">اسأل، اكتب، حلّل أو أنشئ أي شيء.</p>
-              <div class="suggestions">
-                <button class="suggestion" data-quick="اكتب لي رسالة احترافية">✍️ <span>اكتب رسالة احترافية</span></button>
-                <button class="suggestion" data-quick="لخص لي هذا النص">◌ <span>لخص نصًا</span></button>
-                <button class="suggestion" data-quick="اكتب لي خطة عملية لتحقيق هدفي">⌁ <span>أنشئ خطة</span></button>
-                <button class="suggestion" data-quick="اكتب لي كودًا نظيفًا لحل هذه المشكلة">⌘ <span>اكتب كودًا</span></button>
-              </div>
+        <div class="topbar-left">
+          <button class="icon-btn mobile-only" id="menuBtn" type="button" aria-label="فتح القائمة">☰</button>
+          <div class="topbar-brand">
+            <span class="mini-mark">✦</span>
+            <div>
+              <strong>عصر AI</strong>
+              <small id="conversationStatus">مساعد ذكي</small>
             </div>
           </div>
         </div>
 
-        <section class="panel generator-panel hidden" id="imagePanel" aria-label="استوديو الصور">
-          <div class="section-heading"><span class="eyebrow">IMAGE STUDIO</span><h2>أنشئ صورة من فكرتك</h2></div>
-          <div class="provider-grid">
-            <label>المزود<select id="imageProvider"></select></label><label>الموديل<select id="imageModel"></select></label>
-            <label>النسبة<select id="imageAspect"><option value="1:1">1:1</option><option value="16:9">16:9</option><option value="9:16">9:16</option></select></label>
-            <label>الدقة<select id="imageSize"><option>1K</option><option>2K</option><option>4K</option></select></label>
+        <div class="topbar-actions">
+          <button class="icon-btn" id="themeBtn" type="button" title="تبديل الوضع" aria-label="تبديل الوضع">☀</button>
+          <button class="icon-btn danger" id="clearBtn" type="button" title="مسح المحادثة" aria-label="مسح المحادثة">⌫</button>
+        </div>
+      </header>
+
+      <div class="workspace">
+        <section class="hero-panel" id="heroCard" aria-label="الصفحة الرئيسية">
+          <div class="orb-wrap">
+            <div class="ai-orb">
+              <span>✦</span>
+            </div>
           </div>
-          <form id="imageForm"><textarea id="imagePrompt" placeholder="صف الصورة التي تتخيلها..."></textarea><div class="form-actions"><button type="button" class="secondary-btn" data-fill="صورة واقعية سينمائية عالية التفاصيل">مثال</button><button class="primary-btn" id="imageSubmitBtn">إنشاء الصورة</button></div></form>
-          <div id="imageResult"></div>
+
+          <div class="hero-copy">
+            <div class="eyebrow">عصر AI</div>
+            <h1>مساعدك الذكي اليوم</h1>
+            <p>اكتب فكرتك، اطلب إنجازاتك، وابدأ من لحظة واحدة. من المحادثة إلى الصور والصوت، كل شيء داخل تجربة واحدة.</p>
+          </div>
+
+          <div class="quick-suggestions" aria-label="اقتراحات سريعة">
+            <button class="quick-chip" data-quick="اكتب لي رسالة احترافية ومقنعة." type="button">✍️ رسالة</button>
+            <button class="quick-chip" data-quick="لخص هذا النص بشكل مختصر." type="button">✦ تلخيص</button>
+            <button class="quick-chip" data-quick="أنشئ خطة تنفيذية خطوة بخطوة." type="button">⚡ خطة</button>
+            <button class="quick-chip" data-quick="اكتب كودًا نظيفًا يحل هذه المشكلة." type="button">⌘ كود</button>
+          </div>
         </section>
 
-        <section class="panel live-panel hidden" id="livePanel" aria-label="المكالمة المباشرة"><div class="live-ring"><span>🎙</span></div><h2 id="liveStatus">جاهز للاتصال</h2><p>تحدث مع المساعد مباشرة.</p><div id="liveTranscript"></div><div class="form-actions"><button class="live-call" id="liveCallBtn">بدء المكالمة</button><button class="live-stop hidden" id="liveStopBtn">إيقاف</button></div></section>
+        <div class="workspace-grid">
+          <section class="panel chat-panel" id="chatPanel" aria-label="محادثة عصر AI">
+            <div class="panel-topbar">
+              <div class="panel-kicker">محادثة</div>
+              <div class="model-controls">
+                <label class="mini-select">
+                  <span>المزود</span>
+                  <select id="chatProvider"></select>
+                </label>
+                <label class="mini-select">
+                  <span>النموذج</span>
+                  <select id="chatModel"></select>
+                </label>
+                <button class="icon-btn" id="refreshModelsBtn" type="button" title="تحديث النماذج" aria-label="تحديث النماذج">↻</button>
+              </div>
+            </div>
 
-        <div class="mode-tabs" role="tablist" aria-label="أدوات عصر AI"><button class="mode-tab active" data-mode="chat" role="tab">◉ <span>محادثة</span></button><button class="mode-tab" data-mode="image" role="tab">✧ <span>صور</span></button><button class="mode-tab" data-mode="live" role="tab">◌ <span>صوت</span></button></div>
+            <div class="chat-scroll" id="chatScroll" aria-live="polite">
+              <div class="empty-state" id="emptyState">
+                <div class="empty-orb">✦</div>
+                <div class="empty-copy">
+                  <p class="eyebrow">جاهز للبدء</p>
+                  <h2>ابدأ محادثتك اليوم</h2>
+                  <p>اختر النموذج المناسب، ثم اكتب ما تحتاجه. يمكنني مساعدتك في الكتابة، التحليل، الفكرية، التسويق، التعليم، البرمجة، والإنشاء.</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel image-panel hidden" id="imagePanel" aria-label="استوديو الصور">
+            <div class="panel-topbar">
+              <div class="panel-kicker">Image Studio</div>
+            </div>
+
+            <div class="field-grid four">
+              <label class="mini-select">
+                <span>المزود</span>
+                <select id="imageProvider"></select>
+              </label>
+              <label class="mini-select">
+                <span>الموديل</span>
+                <select id="imageModel"></select>
+              </label>
+              <label class="mini-select">
+                <span>النسبة</span>
+                <select id="imageAspect">
+                  <option value="1:1">1:1</option>
+                  <option value="16:9">16:9</option>
+                  <option value="9:16">9:16</option>
+                </select>
+              </label>
+              <label class="mini-select">
+                <span>الدقة</span>
+                <select id="imageSize">
+                  <option value="1K">1K</option>
+                  <option value="2K">2K</option>
+                  <option value="4K">4K</option>
+                </select>
+              </label>
+            </div>
+
+            <form id="imageForm" class="image-form">
+              <textarea id="imagePrompt" rows="4" placeholder="صف الصورة التي تريدها بدقة..."></textarea>
+              <div class="action-row">
+                <button class="secondary-btn" type="button" data-fill="فيلا حديثة فوق سفوح جبلية عند غروب الشمس، إضاءة مميزة، تفاصيل فاخرة">اقتراح 1</button>
+                <button class="secondary-btn" type="button" data-fill="ملابس جاهزة لمتجر فخم، ألوان أنيقة، تصوير احترافي، خلفية ناعمة">اقتراح 2</button>
+              </div>
+              <div class="action-row end">
+                <button class="primary-btn" id="imageSubmitBtn" type="submit">توليد الصورة</button>
+              </div>
+            </form>
+
+            <div class="result-box" id="imageResult" aria-live="polite"></div>
+          </section>
+
+          <section class="panel live-panel hidden" id="livePanel" aria-label="المكالمة المباشرة">
+            <div class="panel-topbar">
+              <div class="panel-kicker">Voice Studio</div>
+            </div>
+            <div class="live-visual">
+              <div class="live-ring">
+                <div class="live-mic">🎙</div>
+              </div>
+              <div class="live-state" id="liveStatus">جاهز للاستماع</div>
+            </div>
+
+            <div class="action-row end">
+              <button class="primary-btn" id="liveCallBtn" type="button">بدء التسجيل</button>
+              <button class="secondary-btn hidden" id="liveStopBtn" type="button">إيقاف</button>
+            </div>
+
+            <div class="transcript-box" id="liveTranscript">الرسالة الصوتية ستظهر هنا بعد التسجيل.</div>
+          </section>
+        </div>
+
+        <div class="mode-switcher" role="tablist" aria-label="أدوات عصر AI">
+          <button class="mode-tab active" data-mode="chat" type="button" role="tab" aria-selected="true">◉ محادثة</button>
+          <button class="mode-tab" data-mode="image" type="button" role="tab" aria-selected="false">◌ صور</button>
+          <button class="mode-tab" data-mode="live" type="button" role="tab" aria-selected="false">◍ صوت</button>
+        </div>
 
         <div class="composer-wrap" id="composerWrap">
-          <div class="composer-tools"><div class="tool-group"><button class="mini-btn" id="attachBtn" title="إرفاق ملف">＋</button><button class="mini-btn" id="characterBtn" title="الشخصية">✦</button></div><small>Enter للإرسال · Shift + Enter لسطر جديد</small></div>
-          <form class="composer" id="composer"><textarea id="chatInput" rows="1" placeholder="اسأل عصر AI أي شيء..." aria-label="رسالتك"></textarea><button class="send-btn" id="sendBtn" aria-label="إرسال">↑</button></form>
+          <div class="composer-tools">
+            <div class="tool-group">
+              <button class="tool-btn" id="attachBtn" type="button" title="إرفاق">＋</button>
+              <button class="tool-btn" id="imageBtn" type="button" title="صور">🖼</button>
+              <button class="tool-btn" id="voiceBtn" type="button" title="صوت">🎙</button>
+            </div>
+            <button class="tool-btn ghost" id="settingsQuickBtn" type="button" title="الإعدادات">⚙</button>
+          </div>
+
+          <form id="composer" class="composer" autocomplete="off">
+            <textarea id="chatInput" rows="1" placeholder="اسأل عصر AI شيئًا جديدًا..." aria-label="محتوى الرسالة"></textarea>
+            <button class="send-btn" id="sendBtn" type="submit" aria-label="إرسال الرسالة">➤</button>
+          </form>
         </div>
-      </section>
+      </div>
     </main>
   </div>
 
-  <div class="modal-backdrop hidden" id="characterModal"><div class="modal-card"><button class="modal-close" data-close="characterModal">×</button><span class="eyebrow">PERSONALITY</span><h2>شخصية المساعد</h2><div class="field-stack"><label>الاسم<input id="charName"></label><label>الشخصية<textarea id="charPersonality" rows="3"></textarea></label><label>المظهر<input id="charAppearance"></label><label>التعليمات<textarea id="charInstructions" rows="3"></textarea></label></div><button class="primary-btn" id="saveCharacterBtn">حفظ الشخصية</button></div></div>
-  <div class="modal-backdrop hidden" id="settingsModal"><div class="modal-card"><button class="modal-close" data-close="settingsModal">×</button><span class="eyebrow">PREFERENCES</span><h2>الإعدادات</h2><div class="settings-list"><button class="setting-row" id="themeBtn"><span>المظهر</span><span>تبديل الوضع ◐</span></button><div class="setting-row"><span>اللغة</span><span>العربية</span></div><div class="setting-row"><span>حفظ المحادثات</span><span class="success-text">مفعّل</span></div></div></div></div>
-  <div class="toast-wrap" id="toastWrap" aria-live="polite"></div>
+  <div class="modal-backdrop hidden" id="characterModal" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="characterTitle">
+      <button class="modal-close" type="button" data-close="characterModal" aria-label="إغلاق">×</button>
+      <div class="eyebrow">PERSONALITY</div>
+      <h3 id="characterTitle">شخصية المساعد</h3>
+      <div class="form-stack">
+        <label>
+          <span>اسم الشخصية</span>
+          <input id="charName" type="text" placeholder="عصر AI">
+        </label>
+        <label>
+          <span>الشخصية</span>
+          <input id="charPersonality" type="text" placeholder="ذكي، واضح، محترف">
+        </label>
+        <label>
+          <span>المظهر</span>
+          <input id="charAppearance" type="text" placeholder="مساعد علمي حديث، هادئ، ودود">
+        </label>
+        <label>
+          <span>التعليمات</span>
+          <textarea id="charInstructions" rows="4" placeholder="اكتب التعليمات الشخصية هنا..."></textarea>
+        </label>
+      </div>
+      <div class="action-row end">
+        <button class="secondary-btn" type="button" data-close="characterModal">إلغاء</button>
+        <button class="primary-btn" id="saveCharacterBtn" type="button">حفظ الشخصية</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="settingsModal" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+      <button class="modal-close" type="button" data-close="settingsModal" aria-label="إغلاق">×</button>
+      <div class="eyebrow">PREFERENCES</div>
+      <h3 id="settingsTitle">الإعدادات</h3>
+      <div class="settings-sections">
+        <div class="settings-group">
+          <h4>Appearance</h4>
+          <label class="switch-row">
+            <span>الوضع الداكن / الفاتح</span>
+            <button class="mini-toggle" id="themeSwitch" type="button">Dark</button>
+          </label>
+          <label class="split-row">
+            <span>اللغة</span>
+            <select id="langSelect">
+              <option value="ar">العربية</option>
+              <option value="en">English</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="settings-group">
+          <h4>Model</h4>
+          <label class="split-row">
+            <span>مزود المحادثة</span>
+            <select id="settingsChatProvider"></select>
+          </label>
+          <label class="split-row">
+            <span>نموذج المحادثة</span>
+            <select id="settingsChatModel"></select>
+          </label>
+        </div>
+
+        <div class="settings-group">
+          <h4>Chat</h4>
+          <label class="switch-row">
+            <span>تجاهل التنبيهات</span>
+            <input type="checkbox" id="quietMode" checked>
+          </label>
+          <label class="switch-row">
+            <span>إظهار حالة التفكير</span>
+            <input type="checkbox" id="thinkingMode" checked>
+          </label>
+        </div>
+
+        <div class="settings-group">
+          <h4>Voice</h4>
+          <label class="split-row">
+            <span>نوع الصوت</span>
+            <select id="voiceStyle">
+              <option value="neutral">Neutral</option>
+              <option value="warm">Warm</option>
+              <option value="bright">Bright</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="action-row end">
+        <button class="secondary-btn" type="button" data-close="settingsModal">إغلاق</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-wrap" id="toastWrap" aria-live="polite" aria-atomic="true"></div>
+
   <script src="/app.js" defer></script>
-  <script src="/interactions.js" defer></script>
 </body>
 </html>
