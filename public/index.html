@@ -57,14 +57,12 @@
           <div class="hero-chips">
             <button class="quick-chip" data-quick="اكتب لي فكرة مشروع مبتكرة">💡 فكرة مشروع</button>
             <button class="quick-chip" data-quick="اكتب لي وصفًا سينمائيًا لصورة جميلة">🎨 فكرة صورة</button>
-            <button class="quick-chip" data-quick="اكتب لي سيناريو فيديو قصير">🎬 فكرة فيديو</button>
-          </div>
+                </div>
         </div>
 
         <div class="mode-tabs" id="modeTabs" role="tablist">
           <button class="mode-tab active" data-mode="chat">💬 <span>محادثة</span></button>
           <button class="mode-tab" data-mode="image">🖼️ <span>صورة</span></button>
-          <button class="mode-tab" data-mode="video">🎬 <span>فيديو</span></button>
           <button class="mode-tab live-tab" data-mode="live">🎙️ <span>مكالمة لايف</span><i></i></button>
         </div>
 
@@ -115,30 +113,6 @@
           <div class="result-box" id="imageResult"></div>
         </section>
 
-        <section class="panel generator-panel hidden" id="videoPanel">
-          <div class="generator-head">
-            <div>
-              <div class="section-kicker">VIDEO STUDIO</div>
-              <h2>توليد الفيديو</h2>
-              <p>Pixazo — فيديوهات قصيرة من وصف نصي.</p>
-            </div>
-            <div class="badge">🎞️ Async</div>
-          </div>
-          <div class="provider-grid">
-            <div class="field-group"><label for="videoModel">النموذج</label><select id="videoModel"></select></div>
-            <div class="field-group"><label for="videoDuration">المدة</label><select id="videoDuration"><option value="3">3 ثواني</option><option value="5" selected>5 ثواني</option><option value="8">8 ثواني</option><option value="10">10 ثواني</option></select></div>
-            <div class="field-group"><label for="videoResolution">الدقة</label><select id="videoResolution"><option>720p</option><option>1080p</option></select></div>
-            <div class="field-group"><label for="videoAspect">النسبة</label><select id="videoAspect"><option>16:9</option><option>9:16</option><option>1:1</option></select></div>
-          </div>
-          <form class="generator-form" id="videoForm">
-            <textarea id="videoPrompt" placeholder="مثال: لقطة جوية فوق مدينة ساحلية ليلًا، أضواء نيون، حركة كاميرا بطيئة..."></textarea>
-            <div class="generator-actions">
-              <button type="button" class="secondary-btn" data-fill-video="لقطة سينمائية لمدينة ليلية تحت المطر">✨ مثال</button>
-              <button class="primary-btn" id="videoSubmitBtn">إنشاء الفيديو <span>➜</span></button>
-            </div>
-          </form>
-          <div class="result-box" id="videoResult"></div>
-        </section>
 
         <section class="panel live-panel hidden" id="livePanel">
           <div class="live-visual">
