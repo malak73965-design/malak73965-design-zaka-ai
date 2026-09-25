@@ -358,7 +358,7 @@ function extractImagePart(data) {
       part?.inlineData ||
       part?.inline_data;
 
-    if (inline?.data) {
+        if (inline?.data) {
       return {
         mimeType:
           safe(
@@ -368,9 +368,11 @@ function extractImagePart(data) {
         data: inline.data
       };
     }
-    }
+  }
+
   return null;
 }
+
 
 function recursiveMediaUrl(value) {
   if (
