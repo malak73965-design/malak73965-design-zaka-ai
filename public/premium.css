@@ -1,356 +1,192 @@
-/* عصر AI — creative product redesign
-   Visual layer only. Existing DOM hooks, API contracts and application logic remain unchanged. */
-
+/* Premium AI shell styling */
 :root {
-  --premium-radius: 24px;
-  --premium-border: rgba(255, 255, 255, .105);
-  --motion-fast: 150ms;
-  --motion-base: 240ms;
-  --motion-slow: 520ms;
-  --ai-violet: #8178ff;
-  --ai-cyan: #52d7e9;
-  --ai-ink: #07111d;
-}
-
-/* Ambient AI canvas */
-html, body {
-  letter-spacing: -.012em;
-  overscroll-behavior-x: none;
+  --premium-radius: 20px;
+  --premium-border: rgba(255,255,255,0.1);
 }
 
 body {
   background:
-    radial-gradient(650px 420px at 10% -8%, rgba(129,120,255,.19), transparent 68%),
-    radial-gradient(520px 420px at 100% 4%, rgba(82,215,233,.12), transparent 66%),
-    linear-gradient(180deg, #07111d 0%, #091522 56%, #07111d 100%);
-}
-
-body::before,
-body::after {
-  content: "";
-  position: fixed;
-  pointer-events: none;
-  z-index: 0;
+    radial-gradient(circle at 8% 8%, rgba(122, 108, 255, 0.18), transparent 22%),
+    radial-gradient(circle at 92% 12%, rgba(42, 214, 255, 0.11), transparent 24%),
+    var(--bg);
+  letter-spacing: -0.01em;
 }
 
 body::before {
+  content: "";
+  position: fixed;
   inset: 0;
-  opacity: .34;
-  background:
-    radial-gradient(circle at 18% 28%, rgba(82,215,233,.22) 0 2px, transparent 3px),
-    radial-gradient(circle at 78% 20%, rgba(129,120,255,.22) 0 1.5px, transparent 3px),
-    radial-gradient(circle at 66% 74%, rgba(255,255,255,.13) 0 1px, transparent 3px);
-  background-size: 230px 260px, 310px 360px, 180px 230px;
-  animation: particlesFloat 18s ease-in-out infinite alternate;
+  pointer-events: none;
+  opacity: 0.25;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 34px 34px;
+  mask-image: linear-gradient(to bottom, rgba(0,0,0,1), transparent 84%);
 }
 
-body::after {
-  width: 42vw;
-  height: 42vw;
-  inset: 22% auto auto 28%;
-  border-radius: 50%;
-  background: rgba(129,120,255,.055);
-  filter: blur(70px);
-  animation: ambientBreathe 9s ease-in-out infinite;
+.app-shell {
+  position: relative;
 }
 
-body.light {
-  background:
-    radial-gradient(650px 420px at 10% -8%, rgba(129,120,255,.13), transparent 68%),
-    radial-gradient(520px 420px at 100% 4%, rgba(82,215,233,.1), transparent 66%),
-    linear-gradient(180deg, #f8fbff 0%, #f1f5fa 100%);
+.sidebar {
+  border-left-color: var(--premium-border);
+  background: linear-gradient(180deg, rgba(12, 18, 32, 0.92), rgba(7, 11, 20, 0.8));
+  box-shadow: 18px 0 60px rgba(0, 0, 0, 0.14);
 }
 
-body.light::before { opacity: .18; }
+.brand-mark, .new-chat-btn, .send-btn, .primary-btn {
+  box-shadow: 0 12px 30px rgba(92, 82, 255, 0.28);
+}
 
-.app-shell,
-.main,
-.sidebar,
-.workspace { position: relative; z-index: 1; }
-
-/* Brand refinement without changing the existing brand hooks */
-.brand-mark,
-.hero-orb {
+.brand-mark {
   position: relative;
   isolation: isolate;
-  box-shadow: 0 16px 34px rgba(104, 97, 255, .28);
 }
 
-.brand-mark::after,
-.hero-orb::after {
+.brand-mark::after {
   content: "";
   position: absolute;
   inset: -5px;
   border-radius: inherit;
-  border: 1px solid rgba(129,120,255,.28);
-  opacity: .65;
-  z-index: -1;
-  animation: orbRing 4.5s ease-in-out infinite;
+  border: 1px solid rgba(122, 108, 255, 0.35);
+  animation: premiumPulse 3s ease-in-out infinite;
 }
-
-/* The product is branded as عصر AI visually while all existing hooks remain intact. */
-.brand-name,
-.top-heading { font-size: 0; }
-.brand-name::after,
-.top-heading::after { content: "عصر AI"; font-size: inherit; }
-.brand-name::after { font-size: 18px; }
-.top-heading::after { font-size: 18px; }
-.brand-sub { font-size: 0; }
-.brand-sub::after { content: "ذكاء اصطناعي بين يديك"; font-size: 11px; }
-
-.sidebar {
-  background: linear-gradient(180deg, rgba(9,17,28,.93), rgba(7,13,22,.82));
-  border-color: var(--premium-border);
-  box-shadow: 18px 0 70px rgba(0,0,0,.16);
-}
-
-body.light .sidebar { background: rgba(255,255,255,.82); }
-
-.new-chat-btn,
-.send-btn,
-.primary-btn {
-  box-shadow: 0 14px 30px rgba(104,97,255,.25);
-}
-
-.new-chat-btn:hover,
-.send-btn:hover,
-.primary-btn:hover { filter: brightness(1.08); }
 
 .topbar {
-  background: rgba(7,17,29,.66);
-  border-color: var(--premium-border);
-  backdrop-filter: blur(20px) saturate(140%);
-  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  background: rgba(7, 11, 20, 0.65);
+  border-bottom-color: var(--premium-border);
 }
 
-body.light .topbar { background: rgba(255,255,255,.72); }
-
-.workspace { gap: 16px; }
+.workspace {
+  position: relative;
+  z-index: 1;
+}
 
 .hero-card {
-  min-height: 178px;
-  border-color: rgba(154,145,255,.24);
+  min-height: 168px;
+  border-color: rgba(150, 139, 255, 0.2);
   background:
-    linear-gradient(135deg, rgba(129,120,255,.18), rgba(82,215,233,.075) 50%, rgba(8,17,28,.88)),
+    linear-gradient(135deg, rgba(122, 108, 255, 0.22), rgba(42, 214, 255, 0.08) 55%, rgba(12, 18, 32, 0.88)),
     var(--panel);
-  box-shadow: 0 24px 70px rgba(0,0,0,.22), inset 0 1px rgba(255,255,255,.07);
-  animation: revealUp var(--motion-slow) both;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.24), inset 0 1px rgba(255,255,255,0.08);
 }
 
-.hero-copy h1 { letter-spacing: -.055em; }
-.hero-kicker { color: #bfc2ff; }
-.hero-actions,
-.hero-chips { gap: 8px; }
+.hero-copy h1 { letter-spacing: -0.05em; }
+.hero-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-inline-start: auto; }
 
-.quick-chip,
-.mode-tab,
-.ghost-btn,
-.icon-btn,
-.mini-btn,
-.secondary-btn,
-.msg-action,
-.history-item,
-.side-action {
-  transition: transform var(--motion-fast) ease, background var(--motion-base) ease,
-    border-color var(--motion-base) ease, box-shadow var(--motion-base) ease,
-    opacity var(--motion-base) ease;
+.quick-chip, .mode-tab, .ghost-btn, .icon-btn, .mini-btn, .secondary-btn {
+  transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.quick-chip:hover,
-.mode-tab:hover,
-.ghost-btn:hover,
-.icon-btn:hover,
-.mini-btn:hover,
-.secondary-btn:hover,
-.msg-action:hover,
-.history-item:hover,
-.side-action:hover {
+.quick-chip:hover, .mode-tab:hover, .ghost-btn:hover, .icon-btn:hover, .mini-btn:hover, .secondary-btn:hover {
   transform: translateY(-2px);
-  border-color: rgba(129,120,255,.42);
-  box-shadow: 0 9px 24px rgba(0,0,0,.13);
+  border-color: rgba(122, 108, 255, 0.52);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
 }
-
-.quick-chip:active,
-.mode-tab:active,
-.ghost-btn:active,
-.icon-btn:active,
-.mini-btn:active,
-.secondary-btn:active,
-.msg-action:active,
-.history-item:active,
-.side-action:active,
-.new-chat-btn:active,
-.send-btn:active { transform: scale(.97); }
 
 .mode-tabs {
-  background: rgba(10,18,29,.58);
-  border-color: var(--premium-border);
-  box-shadow: 0 10px 30px rgba(0,0,0,.1);
+  padding: 5px;
+  width: fit-content;
+  border: 1px solid var(--premium-border);
+  border-radius: 16px;
+  background: rgba(12, 18, 32, 0.58);
+}
+
+.mode-tab {
+  border-color: transparent;
 }
 
 .mode-tab.active {
-  background: linear-gradient(135deg, rgba(129,120,255,.25), rgba(82,215,233,.1));
-  border-color: rgba(129,120,255,.4);
-  box-shadow: 0 8px 24px rgba(88,80,211,.18);
+  background: linear-gradient(135deg, rgba(122,108,255,0.28), rgba(42,214,255,0.14));
+  border-color: rgba(122, 108, 255, 0.42);
+  color: var(--text);
+  box-shadow: 0 8px 24px rgba(75, 65, 200, 0.2);
 }
 
 .panel {
   border-color: var(--premium-border);
-  box-shadow: 0 24px 70px rgba(0,0,0,.2), inset 0 1px rgba(255,255,255,.03);
-  animation: revealUp var(--motion-slow) 80ms both;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.24), inset 0 1px rgba(255,255,255,0.035);
 }
 
 .provider-bar,
-.provider-grid { background: rgba(255,255,255,.018); }
+.provider-grid {
+  background: rgba(255,255,255,0.018);
+}
 
-select:focus,
-input:focus,
-textarea:focus {
+select, input, textarea {
+  border-color: rgba(255,255,255,0.11) !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+select:focus, input:focus, textarea:focus {
   outline: none;
-  border-color: rgba(129,120,255,.72) !important;
-  box-shadow: 0 0 0 4px rgba(129,120,255,.13);
+  border-color: rgba(122, 108, 255, 0.72) !important;
+  box-shadow: 0 0 0 4px rgba(122, 108, 255, 0.12);
 }
 
-.chat-scroll { scrollbar-gutter: stable; }
+.chat-scroll {
+  scrollbar-gutter: stable;
+}
 
-/* Open AI answers; user messages retain a compact conversational shape. */
-.message { animation: messageIn 260ms cubic-bezier(.2,.8,.2,1) both; }
-.message.user .msg-wrap { max-width: min(84%, 620px); }
-.message.user .bubble { border-radius: 20px 20px 6px 20px; }
-.message.ai .msg-wrap { max-width: min(90%, 760px); }
+.message { animation: premiumIn 0.25s ease both; }
+
+.bubble {
+  border-color: rgba(255,255,255,0.1);
+  box-shadow: 0 10px 28px rgba(0,0,0,0.12);
+}
+
 .message.ai .bubble {
-  padding-inline: 0;
-  border-color: transparent;
-  background: transparent;
-  box-shadow: none;
-}
-.message.ai .avatar { animation: orbBreathe 4.8s ease-in-out infinite; }
-.message.ai .msg-actions { margin-top: 10px; }
-.msg-action { min-height: 36px; }
-
-.bubble pre,
-.bubble code {
-  direction: ltr;
-  text-align: left;
-  unicode-bidi: plaintext;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  background: linear-gradient(135deg, rgba(122,108,255,0.12), rgba(255,255,255,0.035));
 }
 
-.bubble pre {
-  max-width: 100%;
-  overflow-x: auto;
-  border-radius: 14px;
-  border: 1px solid var(--line);
-  -webkit-overflow-scrolling: touch;
-}
-
-.bubble img,
-.image-result img,
-.video-result video { max-width: 100%; height: auto; }
-.image-result { animation: mediaIn 360ms cubic-bezier(.2,.8,.2,1) both; }
-
-/* Composer as a floating command dock */
 .composer-wrap {
-  position: sticky;
-  bottom: 0;
-  z-index: 10;
-  margin-inline: -2px;
-  padding: 12px 12px calc(12px + env(safe-area-inset-bottom, 0px));
+  padding: 12px;
   border: 1px solid var(--premium-border);
-  border-radius: 24px;
-  background: linear-gradient(180deg, rgba(10,18,29,.58), rgba(10,18,29,.94));
-  box-shadow: 0 18px 50px rgba(0,0,0,.2);
-  animation: dockIn var(--motion-slow) 140ms both;
+  border-radius: var(--premium-radius);
+  background: rgba(12, 18, 32, 0.72);
+  box-shadow: 0 18px 50px rgba(0,0,0,0.18);
 }
 
-body.light .composer-wrap {
-  background: linear-gradient(180deg, rgba(255,255,255,.64), rgba(255,255,255,.94));
+.composer { border-color: rgba(255,255,255,0.14); }
+.send-btn { transition: transform 0.2s ease, filter 0.2s ease; }
+.send-btn:hover { transform: scale(1.03); filter: brightness(1.08); }
+
+.result-box:empty { display: none; }
+.image-result { animation: premiumIn 0.3s ease both; }
+.modal-card {
+  border-color: var(--premium-border);
+  box-shadow: 0 30px 100px rgba(0,0,0,0.48), inset 0 1px rgba(255,255,255,0.08);
+}
+.toast { box-shadow: 0 14px 35px rgba(0,0,0,0.28); }
+
+@keyframes premiumIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.composer {
-  border-color: rgba(255,255,255,.14);
-  transition: border-color var(--motion-base) ease, box-shadow var(--motion-base) ease, transform var(--motion-base) ease;
+@keyframes premiumPulse {
+  0%, 100% { opacity: 0.35; transform: scale(1); }
+  50% { opacity: 0.9; transform: scale(1.08); }
 }
 
-.composer:focus-within {
-  transform: translateY(-1px);
-  border-color: rgba(129,120,255,.58);
-  box-shadow: 0 0 0 4px rgba(129,120,255,.1), 0 14px 36px rgba(0,0,0,.18);
-}
-
-.composer textarea:focus { outline: none; box-shadow: none; }
-.send-btn { transition: transform var(--motion-fast) ease, filter var(--motion-base) ease, opacity var(--motion-base) ease; }
-
-/* Existing typing bubble becomes the product's thinking state. */
-.typing-message .bubble { min-width: 94px; }
-.typing-bubble span { animation: thinkingDot 1.1s ease-in-out infinite; }
-.typing-bubble span:nth-child(2) { animation-delay: .14s; }
-.typing-bubble span:nth-child(3) { animation-delay: .28s; }
-.typing-message .bubble::after {
-  content: "عصر AI يفكر";
-  margin-inline-start: 5px;
-  color: var(--muted);
-  font-size: 11px;
-  animation: thinkingLabel 1.7s ease-in-out infinite;
-}
-
-/* Mobile drawer: slide + dim, with no new behavior. */
 @media (max-width: 900px) {
-  .sidebar { will-change: transform; }
-  .sidebar::after {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    background: rgba(3,8,14,.5);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 250ms ease;
-  }
-  .sidebar.open::after { opacity: 1; pointer-events: auto; }
-  .hero-card { align-items: flex-start; }
-  .hero-actions,
+  .hero-card { align-items: flex-start; flex-wrap: wrap; }
   .hero-chips { width: 100%; margin-inline-start: 0; }
+  .mode-tabs { width: 100%; }
+  .mode-tab { flex: 1; }
 }
 
-@media (max-width: 620px) {
-  .workspace { padding-inline: 12px; }
-  .hero-card { min-height: 0; padding: 16px 14px; border-radius: 22px; }
-  .hero-copy h1 { font-size: 25px; }
-  .hero-actions,
-  .hero-chips { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); }
-  .quick-chip { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-  .hero-actions .quick-chip:last-child,
-  .hero-chips .quick-chip:last-child { grid-column: 1 / -1; }
-  .message.ai .msg-wrap,
-  .message.user .msg-wrap { max-width: 90%; }
-  .typing-hint { display: none; }
-  .composer-wrap { margin-inline: 0; border-radius: 22px; padding-inline: 8px; }
+@media (max-width: 640px) {
+  .workspace { padding: 14px 12px 24px; }
+  .topbar { padding: 0 14px; }
+  .hero-card { min-height: 0; }
+  .hero-copy h1 { font-size: 24px; }
+  .hero-chips { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 2px; }
+  .quick-chip { flex: 0 0 auto; }
+  .composer-wrap { padding: 9px; }
 }
-
-@media (orientation: landscape) and (max-height: 520px) {
-  .hero-card { padding-block: 12px; }
-  .hero-copy p,
-  .hero-actions,
-  .hero-chips { display: none; }
-}
-
-@keyframes revealUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes dockIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes messageIn { from { opacity: 0; transform: translateY(10px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
-@keyframes mediaIn { from { opacity: 0; transform: scale(.97); } to { opacity: 1; transform: scale(1); } }
-@keyframes orbBreathe { 0%,100% { transform: scale(1); filter: brightness(1); } 50% { transform: scale(1.04); filter: brightness(1.12); } }
-@keyframes orbRing { 0%,100% { opacity: .3; transform: scale(1); } 50% { opacity: .75; transform: scale(1.08); } }
-@keyframes ambientBreathe { 0%,100% { opacity: .35; transform: scale(.96); } 50% { opacity: .8; transform: scale(1.06); } }
-@keyframes particlesFloat { from { transform: translate3d(0,0,0); } to { transform: translate3d(10px,-12px,0); } }
-@keyframes thinkingDot { 0%,80%,100% { transform: scale(.7); opacity: .32; } 40% { transform: scale(1); opacity: 1; } }
-@keyframes thinkingLabel { 0%,100% { opacity: .4; } 50% { opacity: 1; } }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: .01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: .01ms !important;
-    scroll-behavior: auto !important;
-  }
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
