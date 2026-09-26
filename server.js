@@ -619,15 +619,19 @@ app.post('/api/chat', async (req, res) => {
       ? req.body.messages
       : [];
 
-    const lastMessage =
-      messages.length
-        ? safe(
-            messages[messages.length - 1]?.content
-          )
-        : '';
+    const normalizedMessages =
+      messages
+        .filter((item) => item && typeof item === 'object')
+        .map((item) => ({
+          role: safe(item.role) || 'user',
+          content: safe(item.content)
+        }))
+        .filter((item) => item.content);
 
     const message =
-      directMessage || lastMessage;
+      directMessage ||
+      normalizedMessages.at(-1)?.content ||
+      '';
 
     if (!message) {
       return res.status(400).json({
@@ -635,22 +639,86 @@ app.post('/api/chat', async (req, res) => {
       });
     }
 
-    if (provider !== 'gemini') {
+    if (provider !== 'gemini' && provider !== 'openai') {
       return res.status(400).json({
-        error:
-          'المحادثة الحالية تعمل مع Gemini فقط.'
+        error: 'المزود غير مدعوم.'
+      });
+    }
+
+    const models = provider === 'openai'
+      ? await discoverOpenAIModels()
+      : await discoverGeminiModels();
+
+    const model =
+      safe(req.body?.model) ||
+      models[0]?.id ||
+      (provider === 'openai' ? 'gpt-4o-mini' : 'gemini-2.5-flash');
+
+    if (provider === 'openai') {
+      const key = requireKey('OPENAI_API_KEY');
+      const payloadMessages = normalizedMessages.length
+        ? normalizedMessages
+        : [{ role: 'user', content: message }];
+
+      const response = await fetch(
+        'https://api.openai.com/v1/chat/completions',
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${key}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            model,
+            messages: payloadMessages.map((item) => ({
+              role: item.role === 'assistant' ? 'assistant' : 'user',
+              content: item.content
+            }))
+          })
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return res.status(response.status).json({
+          error:
+            data?.error?.message ||
+            'فشل الاتصال بنموذج OpenAI.'
+        });
+      }
+
+      const text = safe(
+        data?.choices?.[0]?.message?.content ||
+        data?.choices?.[0]?.text ||
+        ''
+      );
+
+      if (!text) {
+        return res.status(502).json({
+          error: 'لم يُرجع النموذج نصًا.'
+        });
+      }
+
+      return res.json({
+        ok: true,
+        provider: 'openai',
+        model,
+        text
       });
     }
 
     const key = requireKey('GEMINI_API_KEY');
 
-    const models =
-      await discoverGeminiModels();
-
-    const model =
-      safe(req.body?.model) ||
-      models[0]?.id ||
-      'gemini-2.5-flash';
+    const contents = normalizedMessages.length
+      ? normalizedMessages.map((item) => ({
+          role: item.role === 'assistant' ? 'model' : 'user',
+          parts: [{ text: item.content }]
+        }))
+      : [{
+          role: 'user',
+          parts: [{ text: message }]
+        }];
 
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
@@ -661,16 +729,7 @@ app.post('/api/chat', async (req, res) => {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          contents: [
-            {
-              role: 'user',
-              parts: [
-                {
-                  text: message
-                }
-              ]
-            }
-          ]
+          contents
         })
       }
     );
@@ -709,7 +768,7 @@ app.post('/api/chat', async (req, res) => {
 });
 
 /* -----------------------------
-   توليد صورة Gemini
+    توليد صورة Gemini
 ----------------------------- */
 
 app.post('/api/gemini-image', async (req, res) => {
@@ -802,7 +861,7 @@ app.post('/api/gemini-image', async (req, res) => {
 });
 
 /* -----------------------------
-   توليد صورة Pixazo
+    توليد صورة Pixazo
 ----------------------------- */
 
 app.post('/api/image', async (req, res) => {
@@ -872,7 +931,7 @@ app.post('/api/image', async (req, res) => {
 });
 
 /* -----------------------------
-   حالة صورة Pixazo
+    حالة صورة Pixazo
 ----------------------------- */
 
 async function pixazoStatusHandler(req, res) {
@@ -919,7 +978,7 @@ app.post('/api/status', pixazoStatusHandler);
 app.post('/api/pixazo/status', pixazoStatusHandler);
 
 /* -----------------------------
-   تحويل النص إلى صوت
+    تحويل النص إلى صوت
 ----------------------------- */
 
 app.post('/api/tts', async (req, res) => {
@@ -998,7 +1057,7 @@ app.post('/api/tts', async (req, res) => {
 });
 
 /* -----------------------------
-   Telegram
+    Telegram
 ----------------------------- */
 
 async function sendTelegramMessage({ token, chatId, text, imageUrl, caption, parseMode = 'HTML' }) {
@@ -1141,7 +1200,7 @@ app.post('/api/telegram/send-image', async (req, res) => {
 });
 
 /* -----------------------------
-   المكالمة المباشرة
+    المكالمة المباشرة
 ----------------------------- */
 
 app.post('/api/live-token', async (req, res) => {
@@ -1172,7 +1231,7 @@ app.post('/api/live-token', async (req, res) => {
 });
 
 /* -----------------------------
-   حالة التطبيق
+    حالة التطبيق
 ----------------------------- */
 
 app.get('/api/status', (_req, res) => {
@@ -1190,3 +1249,4 @@ app.listen(PORT, '0.0.0.0', () => {
     `Zaka AI server running on port ${PORT}`
   );
 });
+
