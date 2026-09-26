@@ -1001,6 +1001,42 @@ app.post('/api/tts', async (req, res) => {
    Telegram
 ----------------------------- */
 
+async function sendTelegramMessage({ token, chatId, text, imageUrl, caption, parseMode = 'HTML' }) {
+  const cleanedText = safe(text || caption);
+  const endpoint = imageUrl
+    ? `https://api.telegram.org/bot${token}/sendPhoto`
+    : `https://api.telegram.org/bot${token}/sendMessage`;
+
+  const payload = imageUrl
+    ? {
+        chat_id: chatId,
+        photo: imageUrl,
+        caption: cleanedText || '',
+        parse_mode: parseMode
+      }
+    : {
+        chat_id: chatId,
+        text: cleanedText || '',
+        parse_mode: parseMode
+      };
+
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  });
+
+  const data = await response.json();
+
+  return {
+    ok: response.ok && !!data?.ok,
+    status: response.status,
+    data
+  };
+}
+
 app.post('/api/telegram/send', async (req, res) => {
   try {
     const token =
@@ -1008,49 +1044,98 @@ app.post('/api/telegram/send', async (req, res) => {
 
     const chatId =
       safe(req.body?.chatId) ||
+      safe(req.body?.chat_id) ||
+      safe(req.body?.chatID) ||
+      safe(req.body?.to) ||
       safe(process.env.TELEGRAM_CHAT_ID);
 
     const text =
-      safe(req.body?.text);
+      safe(req.body?.text) ||
+      safe(req.body?.message) ||
+      safe(req.body?.caption) ||
+      '';
 
-    if (!chatId || !text) {
+    const imageUrl =
+      safe(req.body?.imageUrl) ||
+      safe(req.body?.photo) ||
+      safe(req.body?.image) ||
+      safe(req.body?.file);
+
+    if (!chatId) {
       return res.status(400).json({
         error:
-          'أدخل TELEGRAM_CHAT_ID والنص.'
+          'أدخل TELEGRAM_CHAT_ID أو chatId.'
       });
     }
 
-    const response = await fetch(
-      `https://api.telegram.org/bot${token}/sendMessage`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          chat_id: chatId,
-          text
-        })
-      }
-    );
+    if (!text && !imageUrl) {
+      return res.status(400).json({
+        error:
+          'أدخل النص أو رابط الصورة.'
+      });
+    }
 
-    const data = await response.json();
+    const result = await sendTelegramMessage({
+      token,
+      chatId,
+      text,
+      imageUrl: imageUrl || '',
+      caption: text
+    });
 
-    if (!response.ok || !data?.ok) {
-      return res.status(response.status || 500).json({
-        error: data?.description || 'فشل إرسال الرسالة إلى Telegram.'
+    if (!result.ok) {
+      return res.status(result.status || 500).json({
+        error: result.data?.description || 'فشل إرسال الرسالة إلى Telegram.'
       });
     }
 
     res.json({
       ok: true,
-      data
+      data: result.data
     });
   } catch (error) {
     res.status(500).json({
       error:
         error.message ||
         'حدث خطأ في Telegram.'
+    });
+  }
+});
+
+app.post('/api/telegram/send-image', async (req, res) => {
+  try {
+    const token = requireKey('TELEGRAM_BOT_TOKEN');
+    const chatId = safe(req.body?.chatId) || safe(req.body?.chat_id) || safe(process.env.TELEGRAM_CHAT_ID);
+    const imageUrl = safe(req.body?.imageUrl) || safe(req.body?.photo) || safe(req.body?.url);
+    const caption = safe(req.body?.caption) || safe(req.body?.text) || '';
+
+    if (!chatId || !imageUrl) {
+      return res.status(400).json({
+        error: 'أدخل TELEGRAM_CHAT_ID ورابط الصورة.'
+      });
+    }
+
+    const result = await sendTelegramMessage({
+      token,
+      chatId,
+      text: caption,
+      imageUrl,
+      caption
+    });
+
+    if (!result.ok) {
+      return res.status(result.status || 500).json({
+        error: result.data?.description || 'فشل إرسال الصورة إلى Telegram.'
+      });
+    }
+
+    res.json({
+      ok: true,
+      data: result.data
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: error.message || 'حدث خطأ في إرسال الصورة إلى Telegram.'
     });
   }
 });
