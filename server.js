@@ -472,9 +472,7 @@ function getJobId(data) {
 
 function pixazoImagePath(model) {
   if (model === 'flux') {
-    return 'flux/text-to-image';
-  }
-
+    return 'flux-1-schnell/v1/getDataBatch';
   if (model === 'gpt-image-2-5-flare') {
     return 'gpt-image-2-5-flare/v1/text-to-image';
   }
@@ -807,7 +805,7 @@ app.post('/api/gemini-image', async (req, res) => {
           input: prompt,
           response_format: {
             type: 'image',
-            mime_type: 'image/png',
+            mime_type: 'image/jpeg',
             aspect_ratio:
               safe(req.body?.aspectRatio) || '1:1',
             image_size:
