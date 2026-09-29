@@ -463,6 +463,8 @@ function getJobId(data) {
   return (
     safe(data?.job_id) ||
     safe(data?.jobId) ||
+    safe(data?.request_id) ||
+    safe(data?.requestId) ||
     safe(data?.id) ||
     safe(data?.task_id) ||
     safe(data?.taskId) ||
@@ -472,10 +474,12 @@ function getJobId(data) {
 
 function pixazoImagePath(model) {
   if (model === 'flux') {
-  return 'flux-1-schnell/v1/getDataBatch';
-}
+    return 'flux-1-schnell/v1/getDataBatch';
+  }
 
-if (model === 'gpt-image-2-5-flare') {
+  if (model === 'gpt-image-2-5-flare') {
+    return 'gpt-image-2-5-flare/v1/text-to-image';
+  }
 
   if (model.includes('/')) {
     return model;
@@ -490,22 +494,26 @@ function normalizePixazoPath(pathname = '') {
     .replace(/\/+$/, '');
 }
 
-async function pixazoPost(pathname, body) {
+async function pixazoPost(pathname, body, options = {}) {
   const key = requireKey('PIXAZO_API_KEY');
   const url = `https://gateway.pixazo.ai/${normalizePixazoPath(pathname)}`;
 
-  const response = await fetch(
-    url,
-    {
-      method: 'POST',
-      headers: {
-        'Ocp-Apim-Subscription-Key': key,
-        'Content-Type': 'application/json',
-        'Cache-Control': 'no-cache'
-      },
-      body: JSON.stringify(body)
-    }
-  );
+  const headers = {
+    'Content-Type': 'application/json',
+    'Cache-Control': 'no-cache'
+  };
+
+  if (options.flux) {
+    headers['X-Secret-Key'] = key;
+  } else {
+    headers['Ocp-Apim-Subscription-Key'] = key;
+  }
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(body)
+  });
 
   const text = await response.text();
 
@@ -899,7 +907,17 @@ app.post('/api/image', async (req, res) => {
 
     const result = await pixazoPost(
       pixazoImagePath(model),
-      body
+      model === 'flux'
+        ? {
+            prompt,
+            num_steps: 4,
+            width: 1024,
+            height: 1024
+          }
+        : body,
+      {
+        flux: model === 'flux'
+      }
     );
 
     if (!result.response.ok) {
@@ -934,8 +952,7 @@ app.post('/api/image', async (req, res) => {
 
 async function pixazoStatusHandler(req, res) {
   try {
-    const jobId =
-      safe(req.body?.jobId);
+    const jobId = safe(req.body?.jobId);
 
     if (!jobId) {
       return res.status(400).json({
@@ -943,25 +960,45 @@ async function pixazoStatusHandler(req, res) {
       });
     }
 
-    const result = await pixazoPost(
-      `v1/images/${encodeURIComponent(jobId)}`,
-      {}
-    );
+    const key = requireKey('PIXAZO_API_KEY');
+    const url =
+      `https://gateway.pixazo.ai/v2/requests/status/${encodeURIComponent(jobId)}`;
 
-    if (!result.response.ok) {
-      return res.status(result.response.status).json({
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Ocp-Apim-Subscription-Key': key,
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache'
+      }
+    });
+
+    const text = await response.text();
+
+    let data;
+
+    try {
+      data = JSON.parse(text);
+    } catch {
+      data = {
+        raw: text
+      };
+    }
+
+    if (!response.ok) {
+      return res.status(response.status).json({
         error:
-          result.data?.error ||
-          result.data?.message ||
+          data?.error ||
+          data?.message ||
           'تعذر معرفة حالة الصورة.'
       });
     }
 
     res.json({
       ok: true,
-      status: result.data?.status || '',
-      imageUrl: recursiveMediaUrl(result.data),
-      data: result.data
+      status: data?.status || '',
+      imageUrl: recursiveMediaUrl(data),
+      data
     });
   } catch (error) {
     res.status(500).json({
@@ -1247,4 +1284,3 @@ app.listen(PORT, '0.0.0.0', () => {
     `Zaka AI server running on port ${PORT}`
   );
 });
-
